@@ -1,0 +1,12 @@
+INPUT(
+./debug\main.o
+./debug\mainwindow.o
+./debug\mainview.o
+./debug\model.o
+./debug\utility.o
+./debug\user_input.o
+./debug\raytracerscene.o
+./debug\qrc_resources.o
+./debug\moc_mainwindow.o
+./debug\moc_mainview.o
+);

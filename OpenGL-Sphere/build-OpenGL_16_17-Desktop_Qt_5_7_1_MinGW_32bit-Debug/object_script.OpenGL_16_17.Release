@@ -1,0 +1,12 @@
+INPUT(
+./release\main.o
+./release\mainwindow.o
+./release\mainview.o
+./release\model.o
+./release\utility.o
+./release\user_input.o
+./release\raytracerscene.o
+./release\qrc_resources.o
+./release\moc_mainwindow.o
+./release\moc_mainview.o
+);

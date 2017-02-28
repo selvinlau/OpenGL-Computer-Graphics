@@ -27,7 +27,10 @@
 class Scene
 {
 private:
+    //Added renderMode
     RenderMode renderMode;
+    //Added shadows
+    bool shadows;
     
     std::vector<Object*> objects;
     std::vector<Light*> lights;
@@ -36,6 +39,8 @@ private:
     Color tracePhong(Material *material, Point hit, Vector N, Vector V);
     Color traceNormalBuffer(Vector N);
     Color traceZBuffer(Hit N);
+    
+    bool isShadow(const Ray &ray);
     
     double minDist;
     double maxDist;
@@ -46,7 +51,11 @@ public:
     void addLight(Light *l);
     void setMinMax(int w, int h);
     void setEye(Triple e);
+    //Added method to set the render mode
     void setRenderMode(RenderMode rm);
+    //Added method to set whether there are shadows or not
+    void setShadows(bool b);
+    
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
 };

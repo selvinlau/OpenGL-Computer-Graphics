@@ -17,20 +17,24 @@
 #include "scene.h"
 #include "material.h"
 #include "renderMode.h"
+#include "math.h"
 
 Color Scene::trace(const Ray &ray)
 {
+    
     // Find hit object and distance
     Hit min_hit(std::numeric_limits<double>::infinity(),Vector());
     Object *obj = NULL;
     for (unsigned int i = 0; i < objects.size(); ++i) {
+
         Hit hit(objects[i]->intersect(ray));
+        
         if (hit.t<min_hit.t) {
             min_hit = hit;
             obj = objects[i];
         }
     }
-
+    
     // No hit? Return background color.
     if (!obj) return Color(0.0, 0.0, 0.0);
 
@@ -89,6 +93,12 @@ Color Scene::tracePhong(Material *material, Point hit, Vector N, Vector V) {
     for (unsigned int i = 0; i < lights.size(); i++) {
     
         L = (lights[i]->position - hit).normalized();
+        
+        Ray l(hit, L);
+        if (isShadow(l)) {
+            continue;
+        }
+
         NdotL = N.dot(L);
         
         R = (2 * NdotL * N - L).normalized();
@@ -105,6 +115,20 @@ Color Scene::tracePhong(Material *material, Point hit, Vector N, Vector V) {
     
     resultColor = ambient + diffuse + specular;
     return resultColor;
+}
+
+bool Scene::isShadow(const Ray &ray) {
+    if (shadows) {
+        for (unsigned int i = 0; i < objects.size(); i++) {
+        
+            Hit hit(objects[i]->intersect(ray));
+        
+            if (!isnan(hit.t)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 Color Scene::traceNormalBuffer(Vector N)
@@ -188,4 +212,9 @@ void Scene::setEye(Triple e)
 void Scene::setRenderMode(RenderMode rm)
 {
     renderMode = rm;
+}
+
+void Scene::setShadows (bool b)
+{
+    shadows = b;
 }

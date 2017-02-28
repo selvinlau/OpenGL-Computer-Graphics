@@ -31,7 +31,10 @@ private:
     Material* parseMaterial(const YAML::Node& node);
     Object* parseObject(const YAML::Node& node);
     Light* parseLight(const YAML::Node& node);
+    //Added to check what is the render mode
     RenderMode parseRenderMode(const YAML::Node& node);
+    //Added to know read whether there are shadows or not
+    bool parseShadows(const YAML::Node& node);
 
 public:
     Raytracer() { }

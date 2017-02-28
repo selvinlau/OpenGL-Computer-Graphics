@@ -156,6 +156,15 @@ Light* Raytracer::parseLight(const YAML::Node& node)
     return new Light(position,color);
 }
 
+bool Raytracer::parseShadows(const YAML::Node& node) {
+    bool result = false;
+    
+    if( const YAML :: Node * shadows = node.FindValue("Shadows")) {
+        *shadows >> result;
+    }
+    return result;
+}
+
 /*
 * Read a scene from file
 */
@@ -209,6 +218,8 @@ bool Raytracer::readScene(const std::string& inputFilename)
             
             //Read and parse the render mode
             scene->setRenderMode(parseRenderMode(doc));
+            //Read and parse the shadows
+            scene->setShadows(parseShadows(doc));
         }
         if (parser) {
             cerr << "Warning: unexpected YAML document, ignored." << endl;

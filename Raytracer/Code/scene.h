@@ -39,11 +39,16 @@ private:
     Color tracePhong(Material *material, Point hit, Vector N, Vector V);
     Color traceNormalBuffer(Vector N);
     Color traceZBuffer(Hit N);
-    
-    bool isShadow(const Ray &ray);
+    bool isShadow(const Point hit, Vector L);
+    Color reflect(Vector N, Vector R, Point hit, double ks);
     
     double minDist;
     double maxDist;
+    
+    //Added variable to know the recursion depth of the reflections
+    int reflectionDepth;
+    //Added value to store the maximum number of recursions
+    int MAX_REFLECTION_DEPTH;
 public:
     Color trace(const Ray &ray);
     void render(Image &img);
@@ -55,6 +60,8 @@ public:
     void setRenderMode(RenderMode rm);
     //Added method to set whether there are shadows or not
     void setShadows(bool b);
+    //Added method to check the recursion depth of the reflections
+    void setReflectionDepth(int d);
     
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }

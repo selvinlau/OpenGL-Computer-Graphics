@@ -54,6 +54,7 @@ Color Scene::trace(const Ray &ray)
             break;
         case NORMAL:
             resultColor = traceNormalBuffer(N);
+            break;
         default:
             break;
     }
@@ -61,27 +62,11 @@ Color Scene::trace(const Ray &ray)
 }
 
 Color Scene::tracePhong(Material *material, Point hit, Vector N, Vector V) {
-    /****************************************************
-     * This is where you should insert the color
-     * calculation (Phong model).
-     *
-     * Given: material, hit, N, V, lights[]
-     * Sought: color
-     *
-     * Hints: (see triple.h)
-     *        Triple.dot(Vector) dot product
-     *        Vector+Vector      vector sum
-     *        Vector-Vector      vector difference
-     *        Point-Point        yields vector
-     *        Vector.normalize() normalizes vector, returns length
-     *        double*Color        scales each color component (r,g,b)
-     *        Color*Color        dito
-     *        pow(a,b)           a to the power of b
-     ****************************************************/
+    
     Color resultColor; // place holder
     Color ambient;
-    Color diffuse;
-    Color specular;
+    Color diffuse(0.0, 0.0, 0.0);
+    Color specular(0.0, 0.0, 0.0);
     
     double NdotL;
     double RdotV;
@@ -94,8 +79,7 @@ Color Scene::tracePhong(Material *material, Point hit, Vector N, Vector V) {
     
         L = (lights[i]->position - hit).normalized();
         
-        Ray l(hit, L);
-        if (isShadow(l)) {
+        if (isShadow(hit, L)) {
             continue;
         }
 
@@ -108,20 +92,38 @@ Color Scene::tracePhong(Material *material, Point hit, Vector N, Vector V) {
         specular += pow(max(0.0, RdotV), material->n) * lights[i]->color;
     }
     
+    //Compute the reflection and set the counter to 0
+    Color reflection = reflect(N, V, hit, material->ks);
+    reflectionDepth = 0;
+    
     //Compute the total color
     ambient = material->color * material->ka;
     diffuse = diffuse * material->kd * material->color;
-    specular = specular * material->ks;
+    specular = (specular + reflection) * material->ks;
     
-    resultColor = ambient + diffuse + specular;
+    resultColor = ambient + diffuse + specular + reflection;
     return resultColor;
+   
 }
 
-bool Scene::isShadow(const Ray &ray) {
+Color Scene::reflect(Vector N, Vector V, Point hit, double ks) {
+    Color r(0.0, 0.0, 0.0);
+    
+    if (reflectionDepth < MAX_REFLECTION_DEPTH && ks > 0) {
+        Vector VR = 2 * N.dot(V) * N - V;
+        Ray l(hit, VR);
+        reflectionDepth++;
+        r = trace(l) * ks;
+    }
+    return r;
+}
+
+bool Scene::isShadow(const Point hit, Vector L) {
     if (shadows) {
+        Ray l(hit, L);
         for (unsigned int i = 0; i < objects.size(); i++) {
         
-            Hit hit(objects[i]->intersect(ray));
+            Hit hit(objects[i]->intersect(l));
         
             if (!isnan(hit.t)) {
                 return true;
@@ -217,4 +219,9 @@ void Scene::setRenderMode(RenderMode rm)
 void Scene::setShadows (bool b)
 {
     shadows = b;
+}
+
+void Scene::setReflectionDepth(int d) {
+    reflectionDepth = 0;
+    MAX_REFLECTION_DEPTH = d;
 }

@@ -35,6 +35,8 @@ private:
     RenderMode parseRenderMode(const YAML::Node& node);
     //Added to know read whether there are shadows or not
     bool parseShadows(const YAML::Node& node);
+    //Added method to read the max number of recursions
+    int parseReflectionDepth(const YAML::Node& node);
 
 public:
     Raytracer() { }

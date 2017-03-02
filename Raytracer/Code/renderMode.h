@@ -6,7 +6,8 @@ enum RenderMode
 {
 PHONG,
 ZBUFFER,
-NORMAL
+NORMAL,
+REFLECT
 };
 
 

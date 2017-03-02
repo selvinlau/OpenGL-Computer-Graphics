@@ -49,6 +49,15 @@ Triple parseTriple(const YAML::Node& node)
     return t;
 }
 
+int Raytracer::parseReflectionDepth(const YAML::Node& node) {
+    int depthNum = 0;
+    
+    if( const YAML :: Node * depth = node.FindValue("MaxRecursionDepth")) {
+        *depth >> depthNum;
+    }
+    return depthNum;
+}
+
 //Store the render mode of an image. If there is no mode specified, default to Phongs model.
 RenderMode Raytracer::parseRenderMode(const YAML::Node& node)
 {
@@ -220,6 +229,8 @@ bool Raytracer::readScene(const std::string& inputFilename)
             scene->setRenderMode(parseRenderMode(doc));
             //Read and parse the shadows
             scene->setShadows(parseShadows(doc));
+            //Read and parse the max number of recursions
+            scene->setReflectionDepth(parseReflectionDepth(doc));
         }
         if (parser) {
             cerr << "Warning: unexpected YAML document, ignored." << endl;

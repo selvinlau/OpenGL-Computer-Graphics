@@ -18,6 +18,7 @@
 #include "plane.h"
 #include "triangle.h"
 #include "cylinder.h"
+#include "camera.h"
 #include "material.h"
 #include "light.h"
 #include "image.h"
@@ -47,6 +48,26 @@ Triple parseTriple(const YAML::Node& node)
     node[1] >> t.y;
     node[2] >> t.z;	
     return t;
+}
+
+Camera* Raytracer::parseCamera(const YAML::Node& node)
+{
+    Camera *c = new Camera();
+    node["eye"] >> c->eye;
+    node["center"] >> c->center;
+    node["up"] >> c->up;
+    node["viewSize"][0] >> c->height;
+    node["viewSize"][1] >> c->width;
+    return c;
+}
+
+int Raytracer::parseCameraModel(const YAML::Node& node) {
+    int mode = 0; //Eye default
+    if( node.FindValue("Camera")) {
+        mode = 1; //Extended camera
+    }
+    
+    return mode;
 }
 
 int Raytracer::parseNumSamples(const YAML::Node& node) {
@@ -204,9 +225,6 @@ bool Raytracer::readScene(const std::string& inputFilename)
             YAML::Node doc;
             parser.GetNextDocument(doc);
 
-            // Read scene configuration options
-            scene->setEye(parseTriple(doc["Eye"]));
-
             // Read and parse the scene objects
             const YAML::Node& sceneObjects = doc["Objects"];
             if (sceneObjects.GetType() != YAML::CT_SEQUENCE) {
@@ -234,6 +252,8 @@ bool Raytracer::readScene(const std::string& inputFilename)
                 scene->addLight(parseLight(*it));
             }
             
+            // Read scene configuration options
+            
             //Read and parse the render mode
             scene->setRenderMode(parseRenderMode(doc));
             //Read and parse the shadows
@@ -242,6 +262,13 @@ bool Raytracer::readScene(const std::string& inputFilename)
             scene->setReflectionDepth(parseReflectionDepth(doc));
             //Read and parse the number of samples per pixel
             scene->setNumSamples(parseNumSamples(doc));
+            
+            //Read and parse the camera model
+            if (parseCameraModel(doc) == 0) {
+                scene->setEye(parseTriple(doc["Eye"]));
+            } else {
+                scene->setCamera(parseCamera(doc["Camera"]));
+            }
         }
         if (parser) {
             cerr << "Warning: unexpected YAML document, ignored." << endl;

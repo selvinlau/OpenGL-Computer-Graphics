@@ -39,6 +39,9 @@ private:
     int parseReflectionDepth(const YAML::Node& node);
     //Added method to read the number of samples per pixel
     int parseNumSamples(const YAML::Node& node);
+    Camera* parseCamera(const YAML::Node& node);
+    int parseCameraModel(const YAML::Node& node);
+    
 public:
     Raytracer() { }
 

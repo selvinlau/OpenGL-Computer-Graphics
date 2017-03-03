@@ -23,10 +23,16 @@
 #include "object.h"
 #include "image.h"
 #include "renderMode.h"
+#include "camera.h"
 
 class Scene
 {
 private:
+    //Added a variable to store the camera model
+    int cameraModel; //0 for eye 1 for extended
+    
+    //Added a camera for the extended camera model
+    Camera *camera;
     //Added renderMode
     RenderMode renderMode;
     //Added shadows
@@ -69,6 +75,9 @@ public:
     void setReflectionDepth(int d);
     //Added method to check the number of samples per pixel
     void setNumSamples(int s);
+    void setCamera(Camera *c);
+    void setCameraModel(int m);
+    
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
 };

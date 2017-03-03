@@ -17,6 +17,7 @@
 #include "scene.h"
 #include "material.h"
 #include "renderMode.h"
+#include "camera.h"
 #include "math.h"
 
 Color Scene::trace(const Ray &ray)
@@ -259,4 +260,12 @@ void Scene::setReflectionDepth(int d) {
 
 void Scene::setNumSamples(int s) {
     numSamples = s;
+}
+
+void Scene::setCamera(Camera *c) {
+    camera = c;
+}
+
+void Scene::setCameraModel(int m) {
+    cameraModel = m;
 }

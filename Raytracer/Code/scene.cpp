@@ -92,7 +92,7 @@ Color Scene::tracePhong(Material *material, Point hit, Vector N, Vector V) {
         specular += pow(max(0.0, RdotV), material->n) * lights[i]->color;
     }
     
-    //Compute the reflection and set the counter to 0
+    //Compute the reflection and set the counter to 0 after
     Color reflection = reflect(N, V, hit, material->ks);
     reflectionDepth = 0;
     
@@ -159,12 +159,43 @@ void Scene::render(Image &img)
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             Point pixel(x+0.5, h-1-y+0.5, 0);
-            Ray ray(eye, (pixel-eye).normalized());
-            Color col = trace(ray);
-            col.clamp();
-            img(x,y) = col;
+            img(x, y) = sampleColor(pixel);
         }
     }
+}
+
+
+Color Scene::sampleColor(Point center) {
+    Color totalColor(0.0, 0.0, 0.0);
+    
+    //Divide the side size of the pixel between the total number of rays that
+    //will go through it
+    int numRays = pow(numSamples, 2);
+    double shift = 1.0 / numSamples;
+    
+    //Start tracing rays from the left top corner of the pixel
+    //Do an integer division to know how much to shift at the beginning
+    Point leftTopCorner(center);
+    leftTopCorner.x = center.x - (numSamples / 2) * shift + (shift / 2);
+    leftTopCorner.y = center.y + (numSamples / 2) * shift - (shift / 2);
+    
+    //Iterate through the pixel per colums, right to bottom and left to right
+    //(same way that it is done for the pixels of the image in the render method)
+    for (unsigned int i = 0; i < numSamples; i++) {
+        center.x = leftTopCorner.x + i * shift;
+        for (unsigned int j = 0; j < numSamples; j++) {
+            center.y = leftTopCorner.y - j * shift;
+            //Trace a ray through the new position of the pixel, compute the color
+            //of that point and add it to the total
+            Ray ray(eye, (center - eye).normalized());
+            totalColor += trace(ray);
+        }
+    }
+    
+    //Average the color and return it
+    totalColor /= numRays;
+    totalColor.clamp();
+    return totalColor;
 }
 
 void Scene::setMinMax(int w, int h){
@@ -224,4 +255,8 @@ void Scene::setShadows (bool b)
 void Scene::setReflectionDepth(int d) {
     reflectionDepth = 0;
     MAX_REFLECTION_DEPTH = d;
+}
+
+void Scene::setNumSamples(int s) {
+    numSamples = s;
 }

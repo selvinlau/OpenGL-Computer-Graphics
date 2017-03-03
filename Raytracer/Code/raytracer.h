@@ -37,7 +37,8 @@ private:
     bool parseShadows(const YAML::Node& node);
     //Added method to read the max number of recursions
     int parseReflectionDepth(const YAML::Node& node);
-
+    //Added method to read the number of samples per pixel
+    int parseNumSamples(const YAML::Node& node);
 public:
     Raytracer() { }
 

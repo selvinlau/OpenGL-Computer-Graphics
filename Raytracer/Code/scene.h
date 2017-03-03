@@ -39,8 +39,11 @@ private:
     Color tracePhong(Material *material, Point hit, Vector N, Vector V);
     Color traceNormalBuffer(Vector N);
     Color traceZBuffer(Hit N);
+    
+    //New methods added
     bool isShadow(const Point hit, Vector L);
     Color reflect(Vector N, Vector R, Point hit, double ks);
+    Color sampleColor(Point center);
     
     double minDist;
     double maxDist;
@@ -49,6 +52,8 @@ private:
     int reflectionDepth;
     //Added value to store the maximum number of recursions
     int MAX_REFLECTION_DEPTH;
+    //Added value to store the number of samples per pixel
+    int numSamples;
 public:
     Color trace(const Ray &ray);
     void render(Image &img);
@@ -62,7 +67,8 @@ public:
     void setShadows(bool b);
     //Added method to check the recursion depth of the reflections
     void setReflectionDepth(int d);
-    
+    //Added method to check the number of samples per pixel
+    void setNumSamples(int s);
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
 };

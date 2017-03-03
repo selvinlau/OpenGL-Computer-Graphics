@@ -49,6 +49,15 @@ Triple parseTriple(const YAML::Node& node)
     return t;
 }
 
+int Raytracer::parseNumSamples(const YAML::Node& node) {
+    int sampleNum = 1;
+    if( const YAML :: Node * sample = node.FindValue("SuperSampling")) {
+        (*sample)["factor"] >> sampleNum;
+    }
+    
+    return sampleNum;
+}
+
 int Raytracer::parseReflectionDepth(const YAML::Node& node) {
     int depthNum = 0;
     
@@ -231,6 +240,8 @@ bool Raytracer::readScene(const std::string& inputFilename)
             scene->setShadows(parseShadows(doc));
             //Read and parse the max number of recursions
             scene->setReflectionDepth(parseReflectionDepth(doc));
+            //Read and parse the number of samples per pixel
+            scene->setNumSamples(parseNumSamples(doc));
         }
         if (parser) {
             cerr << "Warning: unexpected YAML document, ignored." << endl;

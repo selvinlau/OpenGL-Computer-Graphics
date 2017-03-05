@@ -22,7 +22,6 @@
 
 Color Scene::trace(const Ray &ray)
 {
-    
     // Find hit object and distance
     Hit min_hit(std::numeric_limits<double>::infinity(),Vector());
     Object *obj = NULL;
@@ -59,6 +58,7 @@ Color Scene::trace(const Ray &ray)
         default:
             break;
     }
+    
     return resultColor;
 }
 
@@ -103,6 +103,7 @@ Color Scene::tracePhong(Material *material, Point hit, Vector N, Vector V) {
     specular = (specular + reflection) * material->ks;
     
     resultColor = ambient + diffuse + specular + reflection;
+  
     return resultColor;
    
 }
@@ -147,32 +148,93 @@ Color Scene::traceZBuffer(Hit min_hit)
     return resultColor;
 }
 
-void Scene::render(Image &img)
+//void Scene::render(Image &img)
+//{
+//    int w = img.width();
+//    int h = img.height();
+//    
+//    //If the render mode is zbuffer, we compute the min and max distances
+//    //TODO Change this so it works with the extended camera model (put viewSize in image?)
+//    if(renderMode == ZBUFFER){
+//        setMinMax(w, h);
+//    }
+//    
+//    if (cameraModel == 0) {
+//        renderEyeModel(img, h, w);
+//    } else {
+//        //Extended camera model
+//        renderExtendedModel(img, h, w);
+//    }
+//}
+
+Image Scene::render()
 {
-    int w = img.width();
-    int h = img.height();
+    int w, h;
+    if (cameraModel == 0) {
+        w = 400;
+        h = 400;
+    } else {
+        w = camera->width;
+        h = camera->height;
+    }
+    
+    Image img(w, h);
     
     //If the render mode is zbuffer, we compute the min and max distances
     if(renderMode == ZBUFFER){
         setMinMax(w, h);
     }
     
+    if (cameraModel == 0) {
+        renderEyeModel(img, h, w);
+    } else {
+        //Extended camera model
+        renderExtendedModel(img, h, w);
+    }
+    
+    return img;
+}
+
+void Scene::renderExtendedModel(Image &img, int h, int w) {
+    //TODO CHANGE THE PARAMETERS
+    h = camera->height;
+    w = camera->width;
+    
+    Vector G = camera->center - camera->eye;        //Gaze vector
+    Vector A = G.cross(camera->up).normalized();    //Rigth vector on the eye point
+    Vector B = A.cross(G).normalized();             //Up vector on the eye point, coplanar to A and orthogonal to A and G
+    
+    double totalH = h * camera->pixelSize / 2;
+    double totalW = w * camera->pixelSize / 2;
+    
+    Vector R = A * totalW;                      //Rigth vector at the center of the image
+    Vector U = B * totalH;                      //Up vector at the center of the image
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            Point pixel(x+(camera->pixelSize / 2), h-1-y+(camera->pixelSize / 2), 0);
+            Point P = camera->center + (2 * pixel.x / (w - 1) - 1) * R + (2 * pixel.y / (h - 1) - 1) * U;
+            img(x, y) = sampleColor(camera->eye, P, camera->pixelSize);
+            
+        }
+        
+    }
+}
+
+void Scene::renderEyeModel(Image &img, int h, int w) {
     for (int y = 0; y < h; y++) {
         for (int x = 0; x < w; x++) {
             Point pixel(x+0.5, h-1-y+0.5, 0);
-            img(x, y) = sampleColor(pixel);
+            img(x, y) = sampleColor(eye, pixel, 1.0);
         }
     }
 }
 
-
-Color Scene::sampleColor(Point center) {
+Color Scene::sampleColor(Triple eye, Point center, double pixelSize) {
     Color totalColor(0.0, 0.0, 0.0);
-    
     //Divide the side size of the pixel between the total number of rays that
     //will go through it
     int numRays = pow(numSamples, 2);
-    double shift = 1.0 / numSamples;
+    double shift = pixelSize / numSamples;
     
     //Start tracing rays from the left top corner of the pixel
     //Do an integer division to know how much to shift at the beginning
@@ -192,7 +254,6 @@ Color Scene::sampleColor(Point center) {
             totalColor += trace(ray);
         }
     }
-    
     //Average the color and return it
     totalColor /= numRays;
     totalColor.clamp();
@@ -269,3 +330,4 @@ void Scene::setCamera(Camera *c) {
 void Scene::setCameraModel(int m) {
     cameraModel = m;
 }
+

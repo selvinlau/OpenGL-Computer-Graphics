@@ -10,14 +10,16 @@
 class Camera
 {
 public:
-    Vector eye;        
+    Triple eye;
     Vector center;
     Vector up;
     double height;
     double width;
-
+    double pixelSize;
+    
     Camera() { }
 
+    void setPixelSize() { pixelSize = up.length(); }
 };
 
 #endif /* end of include guard: CAMERA_H_INCLUDED */

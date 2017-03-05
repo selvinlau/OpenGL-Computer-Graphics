@@ -56,8 +56,10 @@ Camera* Raytracer::parseCamera(const YAML::Node& node)
     node["eye"] >> c->eye;
     node["center"] >> c->center;
     node["up"] >> c->up;
-    node["viewSize"][0] >> c->height;
-    node["viewSize"][1] >> c->width;
+    node["viewSize"][0] >> c->width;
+    node["viewSize"][1] >> c->height;
+    c->setPixelSize();
+    
     return c;
 }
 
@@ -265,8 +267,10 @@ bool Raytracer::readScene(const std::string& inputFilename)
             
             //Read and parse the camera model
             if (parseCameraModel(doc) == 0) {
+                scene->setCameraModel(0);
                 scene->setEye(parseTriple(doc["Eye"]));
             } else {
+                scene->setCameraModel(1);
                 scene->setCamera(parseCamera(doc["Camera"]));
             }
         }
@@ -284,9 +288,11 @@ bool Raytracer::readScene(const std::string& inputFilename)
 
 void Raytracer::renderToFile(const std::string& outputFilename)
 {
-    Image img(400,400);
+    //TODO CHANGE
+    //Image img(400,400);
     cout << "Tracing..." << endl;
-    scene->render(img);
+    //scene->render(img);
+    Image img = scene->render();
     cout << "Writing image to " << outputFilename << "..." << endl;
     img.write_png(outputFilename.c_str());
     cout << "Done." << endl;

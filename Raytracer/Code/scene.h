@@ -49,7 +49,7 @@ private:
     //New methods added
     bool isShadow(const Point hit, Vector L);
     Color reflect(Vector N, Vector R, Point hit, double ks);
-    Color sampleColor(Point center);
+    Color sampleColor(Triple eye, Point center, double pixelSize);
     
     double minDist;
     double maxDist;
@@ -60,9 +60,14 @@ private:
     int MAX_REFLECTION_DEPTH;
     //Added value to store the number of samples per pixel
     int numSamples;
+    
+    //Added methods to render the image
+    void renderEyeModel(Image &img, int h, int w);
+    void renderExtendedModel(Image &img, int h, int w);
 public:
     Color trace(const Ray &ray);
-    void render(Image &img);
+    //void render(Image &img);
+    Image render();
     void addObject(Object *o);
     void addLight(Light *l);
     void setMinMax(int w, int h);

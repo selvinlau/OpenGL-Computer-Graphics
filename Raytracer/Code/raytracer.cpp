@@ -100,6 +100,28 @@ int Raytracer::parseReflectionDepth(const YAML::Node& node) {
     return depthNum;
 }
 
+double Raytracer::parseRefract(const YAML::Node& node) {
+    double refract;
+    
+    if( const YAML :: Node * ref = node.FindValue("refrct")) {
+        *ref >> refract;
+    } else {
+        refract = Scene::DEFAULT_REFRACTION_DEPTH;
+    }
+    return refract;
+}
+
+int Raytracer::parseRefractionDepth(const YAML::Node& node) {
+    int depthNum;
+    
+    if( const YAML :: Node * depth = node.FindValue("MaxRefractionDepth")) {
+        *depth >> depthNum;
+    } else {
+        depthNum = Scene::DEFAULT_REFRACTION_DEPTH;
+    }
+    return depthNum;
+}
+
 //Store the render mode of an image. If there is no mode specified, default to Phongs model.
 Scene::RenderModes Raytracer::parseRenderMode(const YAML::Node& node)
 {
@@ -125,6 +147,12 @@ Material* Raytracer::parseMaterial(const YAML::Node& node)
     node["kd"] >> m->kd;
     node["ks"] >> m->ks;
     node["n"] >> m->n;
+    
+    if( const YAML :: Node * eta = node.FindValue("eta")) {
+        *eta >> m->eta;
+    } else {
+        m->eta = Material::DEFAULT_ETA;
+    }
     return m;
 }
 
@@ -280,6 +308,8 @@ bool Raytracer::readScene(const std::string& inputFilename)
             scene->setRenderMode(parseRenderMode(doc));
             scene->setShadows(parseShadows(doc));
             scene->setReflectionDepth(parseReflectionDepth(doc));
+            scene->setRefract(parseRefract(doc));
+            scene->setRefractionDepth(parseRefractionDepth(doc));
             scene->setNumSamples(parseNumSamples(doc));
             
             //Read and parse the camera model

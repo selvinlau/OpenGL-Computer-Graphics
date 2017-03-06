@@ -21,12 +21,15 @@
 class Material
 {
 public:
+    static const int DEFAULT_ETA = 0;
+    
     Color color;        // base color
     double ka;          // ambient intensity
     double kd;          // diffuse intensity
     double ks;          // specular intensity 
     double n;           // exponent for specular highlight size
-
+    double eta;         // refraction coefficient
+    
     Material() { }
 };
 

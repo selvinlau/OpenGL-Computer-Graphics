@@ -101,12 +101,16 @@ Color Scene::tracePhong(Material *material, Point hit, Vector N, Vector V) {
     Color reflection = reflect(N, V, hit, material->ks);
     reflectionDepth = 0;
     
+    //Compute the refraction and set the counter to 0 after
+    Color refraction = refract(N, V, hit, material->eta);
+    refractionDepth = 0;
+    
     //Compute the total color
     ambient = material->color * material->ka;
     diffuse = diffuse * material->kd * material->color;
-    specular = (specular + reflection) * material->ks;
+    specular = specular * material->ks;
     
-    resultColor = ambient + diffuse + specular + reflection;
+    resultColor = ambient + diffuse + specular + reflection + refraction;
   
     return resultColor;
    
@@ -135,6 +139,19 @@ Color Scene::reflect(Vector N, Vector V, Point hit, double ks) {
         Ray l(hit, VR);
         reflectionDepth++;
         r = trace(l) * ks;
+    }
+    return r;
+}
+
+Color Scene::refract(Vector N, Vector V, Point hit, double eta) {
+    Color r(0.0, 0.0, 0.0);
+    //Check whether to keep the refractions or not
+    if (refractionDepth < MAX_REFRACTION_DEPTH && eta > 0) {
+        //Compute the refraction ray and get the color
+        Vector T = (refractCoeff * (V - V.dot(N) * N)) / eta - N * sqrt(1 - pow(refractCoeff, 2) * (1 - (pow(V.dot(N), 2))) / pow(eta, 2));
+        Ray l(hit, -T);
+        refractionDepth++;
+        r = trace(l) * eta;
     }
     return r;
 }
@@ -308,6 +325,15 @@ void Scene::setShadows (bool b)
 void Scene::setReflectionDepth(int d) {
     reflectionDepth = 0;
     MAX_REFLECTION_DEPTH = d;
+}
+
+void Scene::setRefractionDepth(int d) {
+    refractionDepth = 0;
+    MAX_REFRACTION_DEPTH = d;
+}
+
+void Scene::setRefract(double r) {
+    refractCoeff = r;
 }
 
 void Scene::setNumSamples(int s) {

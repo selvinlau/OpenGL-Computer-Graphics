@@ -53,6 +53,8 @@ private:
     Scene::RenderModes parseRenderMode(const YAML::Node& node);
     bool parseShadows(const YAML::Node& node);
     int parseReflectionDepth(const YAML::Node& node);
+    double parseRefract(const YAML::Node& node);
+    int parseRefractionDepth(const YAML::Node& node);
     int parseNumSamples(const YAML::Node& node);
     Camera* parseCamera(const YAML::Node& node);
     Scene::CameraModels parseCameraModel(const YAML::Node& node);

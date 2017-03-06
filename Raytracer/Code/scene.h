@@ -53,6 +53,8 @@ public:
     static const RenderModes DEFAULT_RENDER_MODE = PHONG;
     static const bool DEFAULT_SHADOWS = false;
     static const unsigned int DEFAULT_REFLECTION_DEPTH = 0;
+    static const unsigned int DEFAULT_REFRACTION_DEPTH = 0;
+    static const int DEFAULT_REFRACT = 1;
     static const unsigned int DEFAULT_SAMPLES = 1;
     static const CameraModels DEFAULT_CAMERA_MODEL = EYE;
 
@@ -73,6 +75,8 @@ public:
     void setRenderMode(RenderModes rm);
     void setShadows(bool b);
     void setReflectionDepth(int d);
+    void setRefractionDepth(int d);
+    void setRefract(double r);
     void setNumSamples(int s);
     void setCameraModel(CameraModels m);
     void setCamera(Camera *c);
@@ -92,8 +96,13 @@ private:
     //the maximum number of them
     int reflectionDepth;
     int MAX_REFLECTION_DEPTH;
+    //Same as with the reflection variables
+    int refractionDepth;
+    int MAX_REFRACTION_DEPTH;
     int numSamples;
     CameraModels cameraModel;
+    //Refraction coefficient
+    double refractCoeff;
     
     //Objects
     std::vector<Object*> objects;
@@ -113,7 +122,9 @@ private:
     //Check if there is a shadow at the point hit
     bool isShadow(const Point hit, Vector L);
     //Returns the reflection color
-    Color reflect(Vector N, Vector R, Point hit, double ks);
+    Color reflect(Vector N, Vector V, Point hit, double ks);
+    //Returns the refraction color
+    Color refract(Vector N, Vector V, Point hit, double eta);
     //Returns the average color of a pixel after tracing numSamples rays through it
     Color sampleColor(Triple eye, Point center, double pixelSize);
     

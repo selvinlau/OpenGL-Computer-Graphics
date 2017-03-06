@@ -13,8 +13,8 @@ public:
     Triple eye;
     Vector center;
     Vector up;
-    double height;
-    double width;
+    int height;
+    int width;
     double pixelSize;
     
     Camera() { }

@@ -21,32 +21,41 @@
 #include "light.h"
 #include "scene.h"
 #include "yaml/yaml.h"
-#include "renderMode.h"
 
 class Raytracer {
+public:
+    //Objects enum type
+    enum Objects {
+        SPHERE,
+        PLANE,
+        TRIANGLE,
+        CYLINDER
+    };
+    typedef map<string, Objects> ObjectMap;
+    static ObjectMap mapStringToObject;
+    
+    Raytracer() { }
+    
+    bool readScene(const std::string& inputFilename);
+    void renderToFile(const std::string& outputFilename);
+    
 private:
+    //Map initialization
+    static ObjectMap initObjectMap();
+    
     Scene *scene;
-
     // Couple of private functions for parsing YAML nodes
     Material* parseMaterial(const YAML::Node& node);
     Object* parseObject(const YAML::Node& node);
     Light* parseLight(const YAML::Node& node);
-    //Added to check what is the render mode
-    RenderMode parseRenderMode(const YAML::Node& node);
-    //Added to know read whether there are shadows or not
+    
+    //New parsing methods added
+    Scene::RenderModes parseRenderMode(const YAML::Node& node);
     bool parseShadows(const YAML::Node& node);
-    //Added method to read the max number of recursions
     int parseReflectionDepth(const YAML::Node& node);
-    //Added method to read the number of samples per pixel
     int parseNumSamples(const YAML::Node& node);
     Camera* parseCamera(const YAML::Node& node);
-    int parseCameraModel(const YAML::Node& node);
-    
-public:
-    Raytracer() { }
-
-    bool readScene(const std::string& inputFilename);
-    void renderToFile(const std::string& outputFilename);
+    Scene::CameraModels parseCameraModel(const YAML::Node& node);
 };
 
 #endif /* end of include guard: RAYTRACER_H_6GQO67WK */

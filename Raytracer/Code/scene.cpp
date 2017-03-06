@@ -16,9 +16,13 @@
 
 #include "scene.h"
 #include "material.h"
-#include "renderMode.h"
 #include "camera.h"
 #include "math.h"
+
+//Map initialization
+Scene::RenderMap Scene::mapStringToRender = Scene::initRenderMap();
+Scene::CameraMap Scene::mapStringToCamera = Scene::initCameraMap();
+
 
 Color Scene::trace(const Ray &ray)
 {
@@ -108,33 +112,6 @@ Color Scene::tracePhong(Material *material, Point hit, Vector N, Vector V) {
    
 }
 
-Color Scene::reflect(Vector N, Vector V, Point hit, double ks) {
-    Color r(0.0, 0.0, 0.0);
-    
-    if (reflectionDepth < MAX_REFLECTION_DEPTH && ks > 0) {
-        Vector VR = 2 * N.dot(V) * N - V;
-        Ray l(hit, VR);
-        reflectionDepth++;
-        r = trace(l) * ks;
-    }
-    return r;
-}
-
-bool Scene::isShadow(const Point hit, Vector L) {
-    if (shadows) {
-        Ray l(hit, L);
-        for (unsigned int i = 0; i < objects.size(); i++) {
-        
-            Hit hit(objects[i]->intersect(l));
-        
-            if (!isnan(hit.t)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 Color Scene::traceNormalBuffer(Vector N)
 {
     return Color(N / 2 + 0.5);
@@ -148,76 +125,66 @@ Color Scene::traceZBuffer(Hit min_hit)
     return resultColor;
 }
 
-//void Scene::render(Image &img)
-//{
-//    int w = img.width();
-//    int h = img.height();
-//    
-//    //If the render mode is zbuffer, we compute the min and max distances
-//    //TODO Change this so it works with the extended camera model (put viewSize in image?)
-//    if(renderMode == ZBUFFER){
-//        setMinMax(w, h);
-//    }
-//    
-//    if (cameraModel == 0) {
-//        renderEyeModel(img, h, w);
-//    } else {
-//        //Extended camera model
-//        renderExtendedModel(img, h, w);
-//    }
-//}
+Color Scene::reflect(Vector N, Vector V, Point hit, double ks) {
+    Color r(0.0, 0.0, 0.0);
+    
+    //Check whether to keep the reflections or not
+    if (reflectionDepth < MAX_REFLECTION_DEPTH && ks > 0) {
+        //Compute the reflection ray and get the color
+        Vector VR = 2 * N.dot(V) * N - V;
+        Ray l(hit, VR);
+        reflectionDepth++;
+        r = trace(l) * ks;
+    }
+    return r;
+}
 
-Image Scene::render()
-{
+bool Scene::isShadow(const Point hit, Vector L) {
+    if (shadows) {
+        Ray l(hit, L);
+        //Check if the ray hits with another object
+        for (unsigned int i = 0; i < objects.size(); i++) {
+        
+            Hit hit(objects[i]->intersect(l));
+        
+            if (!isnan(hit.t)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+Image Scene::render() {
     int w, h;
-    if (cameraModel == 0) {
-        w = 400;
-        h = 400;
-    } else {
-        w = camera->width;
-        h = camera->height;
+    
+    switch (cameraModel) {
+        case EYE:
+            h = Image::DEFAULT_IMG_HEIGHT;
+            w = Image::DEFAULT_IMG_WIDTH;
+            break;
+        case EXTENDED:
+            w = camera->width;
+            h = camera->height;
+            break;
     }
     
     Image img(w, h);
-    
     //If the render mode is zbuffer, we compute the min and max distances
     if(renderMode == ZBUFFER){
         setMinMax(w, h);
     }
     
-    if (cameraModel == 0) {
-        renderEyeModel(img, h, w);
-    } else {
-        //Extended camera model
-        renderExtendedModel(img, h, w);
+    switch (cameraModel) {
+        case EYE:
+            renderEyeModel(img, h, w);
+            break;
+        case EXTENDED:
+            renderExtendedModel(img, h, w);
+            break;
     }
     
     return img;
-}
-
-void Scene::renderExtendedModel(Image &img, int h, int w) {
-    //TODO CHANGE THE PARAMETERS
-    h = camera->height;
-    w = camera->width;
-    
-    Vector G = camera->center - camera->eye;        //Gaze vector
-    Vector A = G.cross(camera->up).normalized();    //Rigth vector on the eye point
-    Vector B = A.cross(G).normalized();             //Up vector on the eye point, coplanar to A and orthogonal to A and G
-    
-    double totalH = h * camera->pixelSize / 2;
-    double totalW = w * camera->pixelSize / 2;
-    
-    Vector R = A * totalW;                      //Rigth vector at the center of the image
-    Vector U = B * totalH;                      //Up vector at the center of the image
-    for (int y = 0; y < h; y++) {
-        for (int x = 0; x < w; x++) {
-            Point pixel(x+(camera->pixelSize / 2), h-1-y+(camera->pixelSize / 2), 0);
-            Point P = camera->center + (2 * pixel.x / (w - 1) - 1) * R + (2 * pixel.y / (h - 1) - 1) * U;
-            img(x, y) = sampleColor(camera->eye, P, camera->pixelSize);
-            
-        }
-        
-    }
 }
 
 void Scene::renderEyeModel(Image &img, int h, int w) {
@@ -226,6 +193,29 @@ void Scene::renderEyeModel(Image &img, int h, int w) {
             Point pixel(x+0.5, h-1-y+0.5, 0);
             img(x, y) = sampleColor(eye, pixel, 1.0);
         }
+    }
+}
+
+void Scene::renderExtendedModel(Image &img, int h, int w) {
+    
+    Vector G = camera->center - camera->eye;        //Gaze vector
+    Vector A = G.cross(camera->up).normalized();    //Rigth vector on the eye point
+    Vector B = A.cross(G).normalized();             //Up vector on the eye point, coplanar to A and orthogonal to A and G
+    
+    double totalH = h * camera->pixelSize / 2;      //Half of the total height of the "screen"
+    double totalW = w * camera->pixelSize / 2;      //Half of the total width of the "screen"
+    
+    Vector R = A * totalW;                          //Rigth vector at the center of the image
+    Vector U = B * totalH;                          //Up vector at the center of the image
+    
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            Point pixel(x+(camera->pixelSize / 2), h-1-y+(camera->pixelSize / 2), 0);
+            Point P = camera->center + (2 * pixel.x / (w - 1) - 1) * R + (2 * pixel.y / (h - 1) - 1) * U;
+            img(x, y) = sampleColor(camera->eye, P, camera->pixelSize);
+            
+        }
+        
     }
 }
 
@@ -304,7 +294,8 @@ void Scene::setEye(Triple e)
     eye = e;
 }
 
-void Scene::setRenderMode(RenderMode rm)
+//New setters
+void Scene::setRenderMode(RenderModes rm)
 {
     renderMode = rm;
 }
@@ -327,7 +318,24 @@ void Scene::setCamera(Camera *c) {
     camera = c;
 }
 
-void Scene::setCameraModel(int m) {
+void Scene::setCameraModel(Scene::CameraModels m) {
     cameraModel = m;
 }
 
+//Map initializations
+Scene::RenderMap Scene::initRenderMap() {
+    Scene::RenderMap map;
+    
+    map["phong"] = PHONG;
+    map["z-buffer"] = ZBUFFER;
+    map["normal"] = NORMAL;
+    return map;
+}
+
+Scene::CameraMap Scene::initCameraMap() {
+    Scene::CameraMap map;
+    
+    map["eye"] = EYE;
+    map["Camera"] = EXTENDED;
+    return map;
+}

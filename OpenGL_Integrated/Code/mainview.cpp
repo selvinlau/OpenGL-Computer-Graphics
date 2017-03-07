@@ -70,7 +70,6 @@ void MainView::createShaderPrograms() {
         normalPtr = glGetUniformLocation(mainShaderProg->programId(),"normal");
         lightPosPtr = glGetUniformLocation(mainShaderProg->programId(),"lightPos");
         intensityPtr = glGetUniformLocation(mainShaderProg->programId(),"intensity");
-        positionPtr = glGetUniformLocation(mainShaderProg->programId(),"position");
         camPtr = glGetUniformLocation(mainShaderProg->programId(),"cam");
 
     }
@@ -314,17 +313,17 @@ void loadTexture(QString file, GLuint texPtr) {
     QVector<quint8> rawImg = MainView::imageToBytes(textImg);
 
     //Bind it to the texture pointer
-    glBindTexture(GL_TEXTURE_2D, texPtr);
+    //glBindTexture(GL_TEXTURE_2D, texPtr);
 
     //Add parameters to the texture
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     //Upload the data
-    glTexImage2D(GL_TEXTURE_2D, 0, 1024, 1024, GL_RGBA8, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawImg.data());
+    //glTexImage2D(GL_TEXTURE_2D, 0, 1024, 1024, GL_RGBA8, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawImg.data());
 
     //In case of setting a mipmap
-    glGenerateMipmap(GL_TEXTURE_2D);
+    //glGenerateMipmap(GL_TEXTURE_2D);
 }

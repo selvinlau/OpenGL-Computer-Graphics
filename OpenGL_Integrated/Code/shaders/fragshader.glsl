@@ -7,6 +7,7 @@
 in vec3 vertColor;
 in vec3 coordinates;
 in vec3 normalValue;
+in vec3 position;
 
 // in vec3 vertPos; Using the output from the vertex shader example
 
@@ -15,7 +16,6 @@ in vec3 normalValue;
 uniform vec3 materialColor;
 uniform vec4 intensity;
 uniform vec3 lightPos;
-uniform vec3 position;
 uniform vec3 cam;
 uniform int setting;
 // Specify the output of the fragment shader

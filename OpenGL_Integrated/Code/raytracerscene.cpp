@@ -9,10 +9,11 @@ void MainView::renderSphere(QVector3D pos, QVector3D color, QVector4D material, 
     model.setToIdentity();
     view.setToIdentity();
 
+    //move the world away from us
     view.translate(-200, -200, -1000);
     model.translate(200, 200, 200);
 
-    //Rotate model around the axis
+    //Rotate model around the 200,200,200
     model.rotate(rotationXYZ.x(),1,0,0);
     model.rotate(rotationXYZ.y(),0,1,0);
     model.rotate(rotationXYZ.z(),0,0,1);
@@ -33,7 +34,6 @@ void MainView::renderSphere(QVector3D pos, QVector3D color, QVector4D material, 
     //Pushing of data into the uniform variables
     glUniform3f(lightPosPtr,lightpos.x(),lightpos.y(),lightpos.z());
     glUniform3f(camPtr,-200,-200,-1000);
-    glUniform3f(positionPtr,pos.x(),pos.y(),pos.z());
     glUniform4f(intensityPtr,material.x(),material.y(),material.z(),material.w());
 
     glUniformMatrix4fv(modelPtr,1,GL_FALSE,model.data());

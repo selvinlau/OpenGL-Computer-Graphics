@@ -92,7 +92,6 @@ private:
     GLuint materialColorPtr;
     GLuint intensityPtr;
     GLuint lightPosPtr;
-    GLuint positionPtr;
     GLuint settingPtr;
     GLuint camPtr;
     GLuint texturePtr;

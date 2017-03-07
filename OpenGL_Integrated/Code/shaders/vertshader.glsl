@@ -25,6 +25,7 @@ uniform mat4 view;
 out vec3 vertColor;
 out vec3 coordinates;
 out vec3 normalValue;
+out vec3 position;
 
 void main()
 {
@@ -33,6 +34,7 @@ void main()
     //Applying the changes to the vertex Coordinates
     gl_Position = proj * view * model * vec4(vertCoordinates_in, 1.0);
     vertColor = vertColor_in;
+    position = mat3(model) * vertCoordinates_in;
     coordinates = vertCoordinates_in;
     normalValue = normal * vertNormal_in ;
 }

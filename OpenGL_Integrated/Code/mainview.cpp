@@ -249,7 +249,7 @@ void MainView::resizeGL(int newWidth, int newHeight) {
         proj.perspective(60,(float)newWidth/(float)newHeight,2,6);
     }
     else if(setting == 1){
-        proj.perspective(30.0,(float)newWidth/(float)newHeight,50.0,3200.0);
+        proj.perspective(30.0,(float)newWidth/(float)newHeight,250.0,1000.0);
     }
 }
 
@@ -306,8 +306,25 @@ void MainView::paintGL() {
 
 // TODO: add your code
 void loadTexture(QString file, GLuint texPtr) {
+    //Load the texture image
     QImage textImg;
     textImg.load(file);
 
+    //Transform it to a raw bytes image
+    QVector<quint8> rawImg = MainView::imageToBytes(textImg);
 
+    //Bind it to the texture pointer
+    glBindTexture(GL_TEXTURE_2D, texPtr);
+
+    //Add parameters to the texture
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    //Upload the data
+    glTexImage2D(GL_TEXTURE_2D, 0, 1024, 1024, GL_RGBA8, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawImg.data());
+
+    //In case of setting a mipmap
+    glGenerateMipmap(GL_TEXTURE_2D);
 }

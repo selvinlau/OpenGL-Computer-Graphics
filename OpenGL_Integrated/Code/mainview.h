@@ -32,7 +32,7 @@ public:
     float startY;// capture y starting position
 
     void loadTexture(QString file, GLuint texPtr);
-    QVector<quint8> imageToBytes(QImage image);
+    static QVector<quint8> imageToBytes(QImage image);
     /* End of public members */
 
     QVector3D convertHSLtoRGB(float H, float S, float L);

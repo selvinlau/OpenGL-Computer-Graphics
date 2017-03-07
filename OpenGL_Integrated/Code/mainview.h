@@ -11,6 +11,7 @@
 #include <QOpenGLShaderProgram>
 #include <QTimer>
 #include <QVector3D>
+#include <QImage>
 
 class MainView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
     Q_OBJECT
@@ -30,6 +31,8 @@ public:
     float startX;// capture x starting position
     float startY;// capture y starting position
 
+    void loadTexture(QString file, GLuint texPtr);
+    QVector<quint8> imageToBytes(QImage image);
     /* End of public members */
 
     QVector3D convertHSLtoRGB(float H, float S, float L);
@@ -82,16 +85,20 @@ private:
     GLuint normalBO;
 
     //Pointers for shader
-    GLint modelPtr;
-    GLint viewPtr;
-    GLint projPtr;
-    GLint normalPtr;
-    GLint materialColorPtr;
-    GLint intensityPtr;
-    GLint lightPosPtr;
-    GLint positionPtr;
-    GLint settingPtr;
-    GLint camPtr;
+    GLuint modelPtr;
+    GLuint viewPtr;
+    GLuint projPtr;
+    GLuint normalPtr;
+    GLuint materialColorPtr;
+    GLuint intensityPtr;
+    GLuint lightPosPtr;
+    GLuint positionPtr;
+    GLuint settingPtr;
+    GLuint camPtr;
+    GLuint texturePtr;
+
+    //Extra uniform
+    GLint extra;
 
     //Variable for handling transformation
     QMatrix3x3 normal;

@@ -9,15 +9,16 @@ void MainView::renderSphere(QVector3D pos, QVector3D color, QVector4D material, 
     model.setToIdentity();
     view.setToIdentity();
 
-    //moving the camera to this location
-    view.translate(-200,-200,-1000);
+    view.translate(-200, -200, -1000);
+    model.translate(200, 200, 200);
 
     //Rotate model around the axis
-    model.rotate(rotationXYZ.x(),200,0,0);
-    model.rotate(rotationXYZ.y(),0,200,0);
-    model.rotate(rotationXYZ.z(),0,0,200);
+    model.rotate(rotationXYZ.x(),1,0,0);
+    model.rotate(rotationXYZ.y(),0,1,0);
+    model.rotate(rotationXYZ.z(),0,0,1);
 
     //translate the sphere to their corresponding position
+    model.translate(-200, -200, -200);
     model.translate(pos);
 
     //scale the sphere accordingly

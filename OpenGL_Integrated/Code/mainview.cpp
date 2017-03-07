@@ -249,7 +249,7 @@ void MainView::resizeGL(int newWidth, int newHeight) {
         proj.perspective(60,(float)newWidth/(float)newHeight,2,6);
     }
     else if(setting == 1){
-        proj.perspective(30.0,(float)newWidth/(float)newHeight,50.0,1600.0);
+        proj.perspective(30.0,(float)newWidth/(float)newHeight,50.0,3200.0);
     }
 }
 
@@ -280,13 +280,13 @@ void MainView::paintGL() {
         //move 4 units
         view.translate(0.0,0.0,-4.0);
 
-        //Scaling base on Scalevalue returned from user_input. Default value is 1
-        model.scale(scaleValue);
-
         //Rotation around their x y and z axis
         model.rotate(rotationXYZ.x(),1,0,0);
         model.rotate(rotationXYZ.y(),0,1,0);
         model.rotate(rotationXYZ.z(),0,0,1);
+
+        //Scaling base on Scalevalue returned from user_input. Default value is 1
+        model.scale(scaleValue);
 
         //Push to GPU
         glUniformMatrix4fv(modelPtr,1,GL_FALSE,model.data());
@@ -305,3 +305,9 @@ void MainView::paintGL() {
 // Add your function implementations below
 
 // TODO: add your code
+void loadTexture(QString file, GLuint texPtr) {
+    QImage textImg;
+    textImg.load(file);
+
+
+}

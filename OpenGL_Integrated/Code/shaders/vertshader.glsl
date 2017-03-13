@@ -7,6 +7,7 @@
 layout (location = 0) in vec3 vertCoordinates_in;
 layout (location = 1) in vec3 vertColor_in;
 layout (location = 2) in vec3 vertNormal_in;
+layout (location = 3) in vec2 textCoordinates_in;
 
 // Specify the Uniforms of the vertex shader
 
@@ -26,6 +27,7 @@ out vec3 vertColor;
 out vec3 coordinates;
 out vec3 normalValue;
 out vec3 position;
+out vec2 vertexTextureCoords;
 
 void main()
 {
@@ -37,4 +39,5 @@ void main()
     position = mat3(model) * vertCoordinates_in;
     coordinates = vertCoordinates_in;
     normalValue = normal * vertNormal_in ;
+    vertexTextureCoords = textCoordinates_in;
 }

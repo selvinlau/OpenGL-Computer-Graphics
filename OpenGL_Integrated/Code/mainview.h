@@ -63,6 +63,7 @@ private:
 
     // Raytracer scene functions
     void renderSphere(QVector3D pos, QVector3D color, QVector4D material, QVector3D lightpos);
+    void renderCube(QVector4D material, QVector3D lightpos);
     void renderRaytracerScene();
 
     /* Add your private members below */
@@ -75,7 +76,7 @@ private:
     //Change settings to obtain desire results
     //0 = cube
     //1 = sphere
-    GLint setting = 1;
+    GLint setting = 0;
 
     //buffer pointer for GPU
     Model *shapeModel;
@@ -83,6 +84,7 @@ private:
     GLuint VAO;
     GLuint colorBO;
     GLuint normalBO;
+    GLuint texCoordBO;
 
     //Pointers for shader
     GLuint modelPtr;
@@ -92,12 +94,13 @@ private:
     GLuint materialColorPtr;
     GLuint intensityPtr;
     GLuint lightPosPtr;
-    GLuint settingPtr;
     GLuint camPtr;
     GLuint texturePtr;
 
+    uint animationFrame = 0;
+
     //Extra uniform
-    GLint extra;
+    GLint samplerTex;
 
     //Variable for handling transformation
     QMatrix3x3 normal;

@@ -31,11 +31,13 @@ MainView::~MainView() {
 
 
     glDeleteBuffers(1,&shapeBO);
-    if(setting == 0){
-        glDeleteBuffers(1,&colorBO);
-    }else if(setting == 1){
-        glDeleteBuffers(1,&normalBO);
-    }
+    glDeleteBuffers(1,&colorBO);
+    glDeleteBuffers(1,&normalBO);
+
+    glDeleteBuffers(1,&texCoordBO);
+
+    glDeleteTextures(1,&texturePtr);
+
     glDeleteVertexArrays(1,&VAO);
 
     // Free the main shader
@@ -63,16 +65,15 @@ void MainView::createShaderPrograms() {
     modelPtr = glGetUniformLocation(mainShaderProg->programId(),"model");
     viewPtr = glGetUniformLocation(mainShaderProg->programId(),"view");
     projPtr = glGetUniformLocation(mainShaderProg->programId(),"proj");
-    settingPtr = glGetUniformLocation(mainShaderProg->programId(),"setting");
 
-    if(setting == 1){
-        materialColorPtr = glGetUniformLocation(mainShaderProg->programId(),"materialColor");
-        normalPtr = glGetUniformLocation(mainShaderProg->programId(),"normal");
-        lightPosPtr = glGetUniformLocation(mainShaderProg->programId(),"lightPos");
-        intensityPtr = glGetUniformLocation(mainShaderProg->programId(),"intensity");
-        camPtr = glGetUniformLocation(mainShaderProg->programId(),"cam");
+    samplerTex = glGetUniformLocation(mainShaderProg->programId(),"texture");
 
-    }
+    materialColorPtr = glGetUniformLocation(mainShaderProg->programId(),"materialColor");
+    normalPtr = glGetUniformLocation(mainShaderProg->programId(),"normal");
+    lightPosPtr = glGetUniformLocation(mainShaderProg->programId(),"lightPos");
+    intensityPtr = glGetUniformLocation(mainShaderProg->programId(),"intensity");
+    camPtr = glGetUniformLocation(mainShaderProg->programId(),"cam");
+
     /* End of custom shaders */
 
     // Store the locations (pointers in gpu memory) of uniforms in Glint's
@@ -98,20 +99,22 @@ void MainView::createBuffers() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,0);
 
-    if(setting == 0){
-        //Generating/Binding color buffer
-        glGenBuffers(1,&colorBO);
-        glBindBuffer(GL_ARRAY_BUFFER,colorBO);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,0,0);
-    }
-    else if(setting == 1){
-        //Generating/Binding normal buffer
-        glGenBuffers(1,&normalBO);
-        glBindBuffer(GL_ARRAY_BUFFER,normalBO);
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,0,0);
-    }
+    //Generating/Binding color buffer
+    glGenBuffers(1,&colorBO);
+    glBindBuffer(GL_ARRAY_BUFFER,colorBO);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,0,0);
+
+    //Generating/Binding normal buffer
+    glGenBuffers(1,&normalBO);
+    glBindBuffer(GL_ARRAY_BUFFER,normalBO);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,0,0);
+
+    glGenBuffers(1,&texCoordBO);
+    glBindBuffer(GL_ARRAY_BUFFER,texCoordBO);
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3,2,GL_FLOAT,GL_FALSE,0,0);
 
     //UnBinding VertexArray buffer
     glBindVertexArray(0);
@@ -128,11 +131,25 @@ void MainView::loadModel(QString filename, GLuint bufferObject) {
     QVector<QVector3D> vectorList;
     QVector<QVector3D> colorList;
     QVector<QVector3D> normalList;
+    QVector<QVector2D> uvList;
     vectorList = shapeModel->getVertices();
+    uvList = shapeModel->getTextureCoords();
+
+    glBindBuffer(GL_ARRAY_BUFFER,texCoordBO);
+    glBufferData(GL_ARRAY_BUFFER,sizeof(GLfloat)*vectorList.size()*3,uvList.data(),GL_DYNAMIC_DRAW);
 
     //pushing of data to GPU using shape buffer pointer
     glBindBuffer(GL_ARRAY_BUFFER,bufferObject);
     glBufferData(GL_ARRAY_BUFFER,sizeof(GLfloat)*vectorList.size()*3,vectorList.data(),GL_DYNAMIC_DRAW);
+
+
+    normalList = shapeModel->getNormals();
+    qDebug() <<normalList[1];
+
+    //pushing of data to GPU using normal pointer
+    glBindBuffer(GL_ARRAY_BUFFER,normalBO);
+    glBufferData(GL_ARRAY_BUFFER,sizeof(GLfloat)*normalList.size()*3,normalList.data(),GL_DYNAMIC_DRAW);
+
 
     if(setting == 0){
         for(uint i = 0; i < numTris;i++){
@@ -155,16 +172,6 @@ void MainView::loadModel(QString filename, GLuint bufferObject) {
         glBindBuffer(GL_ARRAY_BUFFER,colorBO);
         glBufferData(GL_ARRAY_BUFFER,sizeof(GLfloat)*colorList.size()*3,colorList.data(),GL_DYNAMIC_DRAW);
     }
-    else if(setting == 1){
-
-        normalList = shapeModel->getNormals();
-
-        //pushing of data to GPU using normal pointer
-        glBindBuffer(GL_ARRAY_BUFFER,normalBO);
-        glBufferData(GL_ARRAY_BUFFER,sizeof(GLfloat)*normalList.size()*3,normalList.data(),GL_DYNAMIC_DRAW);
-
-    }
-
 
 }
 
@@ -218,6 +225,10 @@ void MainView::initializeGL() {
 
     /* TODO: call your initialization functions here */
 
+    glGenTextures(1,&texturePtr);
+    loadTexture(":/textures/rug_logo.png",texturePtr);
+
+
     createShaderPrograms();
 
     createBuffers();
@@ -228,7 +239,8 @@ void MainView::initializeGL() {
     }
 
     // For animation, you can start your timer here
-
+    timer.setInterval(16);
+    timer.start();
 }
 
 /**
@@ -269,42 +281,27 @@ void MainView::paintGL() {
     //Bind the Vertex Array before drawing
     glBindVertexArray(VAO);
 
-    //Pushing of setting value into the shader to ensure correct usage of values
-    glUniform1i(settingPtr,setting);
+    //Animation Frame
+    animationFrame++;
+    updateRotation(animationFrame,animationFrame,0);
 
-    if(setting == 0){
-        model.setToIdentity();
-        view.setToIdentity();
+    //Pushing the texture to fragshader
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D,texturePtr);
 
-        //move 4 units
-        view.translate(0.0,0.0,-4.0);
+    //Pushing texture 0 to the shader
+    glUniform1i(samplerTex,0);
 
-        //Rotation around their x y and z axis
-        model.rotate(rotationXYZ.x(),1,0,0);
-        model.rotate(rotationXYZ.y(),0,1,0);
-        model.rotate(rotationXYZ.z(),0,0,1);
+    //Render objects
+    renderRaytracerScene();
 
-        //Scaling base on Scalevalue returned from user_input. Default value is 1
-        model.scale(scaleValue);
-
-        //Push to GPU
-        glUniformMatrix4fv(modelPtr,1,GL_FALSE,model.data());
-        glUniformMatrix4fv(viewPtr,1,GL_FALSE,view.data());
-        glUniformMatrix4fv(projPtr,1,GL_FALSE,proj.data());
-
-
-        //Start drawing
-        glDrawArrays(GL_TRIANGLES,0,shapeModel->getVertices().size());
-    }else if(setting == 1){
-        renderRaytracerScene();
-    }
     mainShaderProg->release();
 }
 
 // Add your function implementations below
 
 // TODO: add your code
-void loadTexture(QString file, GLuint texPtr) {
+void MainView::loadTexture(QString file, GLuint texPtr) {
     //Load the texture image
     QImage textImg;
     textImg.load(file);
@@ -313,17 +310,17 @@ void loadTexture(QString file, GLuint texPtr) {
     QVector<quint8> rawImg = MainView::imageToBytes(textImg);
 
     //Bind it to the texture pointer
-    //glBindTexture(GL_TEXTURE_2D, texPtr);
+    glBindTexture(GL_TEXTURE_2D, texPtr);
 
     //Add parameters to the texture
-    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     //Upload the data
-    //glTexImage2D(GL_TEXTURE_2D, 0, 1024, 1024, GL_RGBA8, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawImg.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024 , 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawImg.data());
 
     //In case of setting a mipmap
-    //glGenerateMipmap(GL_TEXTURE_2D);
+
 }

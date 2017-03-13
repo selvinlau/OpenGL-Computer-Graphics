@@ -10,5 +10,14 @@
         <file>textures/rug_logo.png</file>
         <file>models/cat.obj</file>
         <file>models/sphere.obj</file>
+        <file>textures/pokeball.png</file>
+        <file>textures/longpb.png</file>
+        <file>textures/space1.jpg</file>
+        <file>textures/space2.jpg</file>
+        <file>textures/space3.jpg</file>
+        <file>textures/space4.jpg</file>
+        <file>textures/space5.jpg</file>
+        <file>textures/mtex.png</file>
+        <file>models/mcube.obj</file>
     </qresource>
 </RCC>

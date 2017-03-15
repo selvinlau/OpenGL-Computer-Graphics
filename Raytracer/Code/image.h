@@ -40,6 +40,7 @@ public:
     Image(const char *imageFilename)
         : _pixel(0), _width(0), _height(0)
     {
+        cout << imageFilename << endl;
         read_png(imageFilename);
     }
 

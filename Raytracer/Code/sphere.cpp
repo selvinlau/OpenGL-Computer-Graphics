@@ -20,6 +20,24 @@
 
 /************************** Sphere **********************************/
 
+Point Sphere::textureCoordinates(Point p) {
+    double u;
+    double v;
+    double theta;
+    double phi;
+    
+    theta = acos((p.z - this->position.z) / this->r);
+    phi = atan2(p.y - this->position.y, p.x - this->position.x);
+    
+    if (phi < 0) {
+        phi += 2 * M_PI;
+    }
+    
+    u = phi / (2 * M_PI);
+    v = (M_PI - theta) / M_PI;
+    return Point(u, v, 0);
+}
+
 Hit Sphere::intersect(const Ray &ray)
 {
     /****************************************************

@@ -21,6 +21,10 @@
 #include "light.h"
 #include "scene.h"
 #include "yaml/yaml.h"
+#include "sphere.h"
+#include "plane.h"
+#include "triangle.h"
+#include "cylinder.h"
 
 class Raytracer {
 public:
@@ -58,6 +62,12 @@ private:
     int parseNumSamples(const YAML::Node& node);
     Camera* parseCamera(const YAML::Node& node);
     Scene::CameraModels parseCameraModel(const YAML::Node& node);
+    
+    //Parse objects
+    Sphere* parseSphere(const YAML::Node& node);
+    Plane* parsePlane(const YAML::Node& node);
+    Triangle* parseTriangle(const YAML::Node& node);
+    Cylinder* parseCylinder(const YAML::Node& node);
 };
 
 #endif /* end of include guard: RAYTRACER_H_6GQO67WK */

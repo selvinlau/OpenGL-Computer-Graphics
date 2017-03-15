@@ -13,3 +13,13 @@
 //
 
 #include "material.h"
+
+Color Material::getColor(Point p) {
+    
+    if (texture == NULL) {
+        return color;
+    } else {
+        Point imgCoords = object->textureCoordinates(p);
+        return texture->colorAt(imgCoords.x, imgCoords.y);
+    }
+}

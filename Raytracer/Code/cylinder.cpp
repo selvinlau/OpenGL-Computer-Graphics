@@ -102,3 +102,7 @@ bool Cylinder::isInsideBody(Point p1, Point p2, Point intersect) {
 bool Cylinder::isInsideCap(Point c, Point intersect, double r) {
     return (intersect - c).dot(intersect - c) < r*r;
 }
+
+Point Cylinder::textureCoordinates(Point p) {
+    return p;
+}

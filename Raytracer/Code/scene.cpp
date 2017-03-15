@@ -106,8 +106,8 @@ Color Scene::tracePhong(Material *material, Point hit, Vector N, Vector V) {
     refractionDepth = 0;
     
     //Compute the total color
-    ambient = material->color * material->ka;
-    diffuse = diffuse * material->kd * material->color;
+    ambient = material->getColor(hit) * material->ka;
+    diffuse = diffuse * material->kd * material->getColor(hit);
     specular = specular * material->ks;
     
     resultColor = ambient + diffuse + specular + reflection + refraction;

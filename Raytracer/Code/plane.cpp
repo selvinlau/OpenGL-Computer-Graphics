@@ -21,3 +21,7 @@ Hit Plane::intersect(const Ray &ray)
     
     return Hit(t,N);
 }
+
+Point Plane::textureCoordinates(Point p) {
+    return p;
+}

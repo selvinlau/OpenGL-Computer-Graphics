@@ -14,6 +14,7 @@ public:
     Plane(Point p1, Point p2, Point p3) : point(p1), N((p2 - p1).cross(p3 - p1)) {}
     
     virtual Hit intersect(const Ray &ray);
+    virtual Point textureCoordinates(Point p);
     
     const Point point;
     const Vector N;

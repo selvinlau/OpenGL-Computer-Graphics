@@ -8,3 +8,21 @@
 *.png
 
 *.yaml
+
+*.stash
+
+*.plist
+
+OpenGL_Integrated/build-OpenGL_16_17-Desktop_Qt_5_8_0_clang_64bit-Debug/OpenGL_16_17.app/Contents/PkgInfo
+
+*.lproj
+
+*.pro.user
+
+OpenGL_Integrated/Code/OpenGL_16_17.pro.user.0411003
+
+OpenGL_Integrated/Code/OpenGL_16_17.pro.user
+
+OpenGL_Integrated/Code/OpenGL_16_17.pro.user
+
+Raytracer/Code/ray

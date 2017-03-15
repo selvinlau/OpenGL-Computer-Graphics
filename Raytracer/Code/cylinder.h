@@ -11,7 +11,8 @@ public:
     Cylinder(Point p1, Point p2, double r) : p1(p1), p2(p2), r(r) { }
 
     virtual Hit intersect(const Ray &ray);
-
+    virtual Point textureCoordinates(Point p);
+    
     const Point p1;
     const Point p2;
     const double r;

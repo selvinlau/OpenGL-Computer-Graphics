@@ -11,7 +11,8 @@ public:
     Triangle(Point v1, Point v2, Point v3) : v1(v1), v2(v2), v3(v3) { }
 
     virtual Hit intersect(const Ray &ray);
-
+    virtual Point textureCoordinates(Point p);
+    
     const Point v1;
     const Point v2;
     const Point v3;

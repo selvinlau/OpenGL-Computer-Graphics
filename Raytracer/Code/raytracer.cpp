@@ -142,18 +142,103 @@ Scene::RenderModes Raytracer::parseRenderMode(const YAML::Node& node)
 Material* Raytracer::parseMaterial(const YAML::Node& node)
 {
     Material *m = new Material();
-    node["color"] >> m->color;	
+    
+    //Parse material texture or color
+    if(const YAML :: Node * texture = node.FindValue("texture")) {
+        std::string text;
+        *texture >> text;
+        const char * c = text.c_str();
+        m->texture = new Image(c);
+        cout << c << endl;
+        cout << "TEXT" << m->texture->colorAt(0.1, 0.1) << endl;
+    } else {
+        node["color"] >> m->color;
+        m->texture = NULL;
+    }
+    
     node["ka"] >> m->ka;
     node["kd"] >> m->kd;
     node["ks"] >> m->ks;
     node["n"] >> m->n;
     
+    //Parse refraction coefficient
     if( const YAML :: Node * eta = node.FindValue("eta")) {
         *eta >> m->eta;
     } else {
         m->eta = Material::DEFAULT_ETA;
     }
     return m;
+}
+
+Sphere* Raytracer::parseSphere(const YAML::Node& node) {
+    Sphere *sphere;
+    Point pos;
+    double r;
+    
+    node["position"] >> pos;
+    
+    if (node["radius"].size() == 2) {
+        Vector axis;
+        double angle;
+        
+        node["radius"][0] >> r;
+        node["radius"][1] >> axis;
+        node["angle"] >> angle;
+        
+        sphere = new Sphere(pos, r, axis, angle);
+    } else {
+        node["radius"] >> r;
+        sphere = new Sphere(pos, r);
+    }
+    
+    return sphere;
+}
+
+Plane* Raytracer::parsePlane(const YAML::Node& node) {
+    Plane *plane;
+    std::string form;
+    node["formula"] >> form;
+    if (form == "points") {
+        Point p1;
+        Point p2;
+        Point p3;
+        
+        node["p1"] >> p1;
+        node["p2"] >> p2;
+        node["p3"] >> p3;
+        plane = new Plane(p1, p2, p3);
+    } else {
+        Point point;
+        Vector N;
+        
+        node["point"] >> point;
+        node["normal"] >> N;
+        plane = new Plane(point, N);
+    }
+    
+    return plane;
+}
+
+Triangle* Raytracer::parseTriangle(const YAML::Node& node) {
+    Point v1;
+    Point v2;
+    Point v3;
+    
+    node["v1"] >> v1;
+    node["v2"] >> v2;
+    node["v3"] >> v3;
+    return new Triangle(v1,v2,v3);
+}
+
+Cylinder* Raytracer::parseCylinder(const YAML::Node& node) {
+    Point p1;
+    Point p2;
+    double r;
+    
+    node["p1"] >> p1;
+    node["p2"] >> p2;
+    node["r"] >> r;
+    return new Cylinder(p1,p2,r);
 }
 
 Object* Raytracer::parseObject(const YAML::Node& node)
@@ -164,66 +249,17 @@ Object* Raytracer::parseObject(const YAML::Node& node)
 
     switch (mapStringToObject[objectSt]) {
         case SPHERE:
-        {
-            Point pos;
-            node["position"] >> pos;
-            double r;
-            node["radius"] >> r;
-            Sphere *sphere = new Sphere(pos,r);
-            returnObject = sphere;
+            returnObject = parseSphere(node);
             break;
-        }
         case PLANE:
-        {
-            Plane *plane;
-            std::string form;
-            node["formula"] >> form;
-            if (form == "points") {
-                Point p1;
-                Point p2;
-                Point p3;
-                
-                node["p1"] >> p1;
-                node["p2"] >> p2;
-                node["p3"] >> p3;
-                plane = new Plane(p1, p2, p3);
-            } else {
-                Point point;
-                Vector N;
-                
-                node["point"] >> point;
-                node["normal"] >> N;
-                plane = new Plane(point, N);
-            }
-            returnObject = plane;
+            returnObject = parsePlane(node);
             break;
-        }
         case TRIANGLE:
-        {
-            Point v1;
-            Point v2;
-            Point v3;
-            
-            node["v1"] >> v1;
-            node["v2"] >> v2;
-            node["v3"] >> v3;
-            Triangle *triangle = new Triangle(v1,v2,v3);
-            returnObject = triangle;
+            returnObject = parseTriangle(node);
             break;
-        }
         case CYLINDER:
-        {
-            Point p1;
-            Point p2;
-            double r;
-            
-            node["p1"] >> p1;
-            node["p2"] >> p2;
-            node["r"] >> r;
-            Cylinder *cylinder = new Cylinder(p1,p2,r);
-            returnObject = cylinder;
+            returnObject = parseCylinder(node);
             break;
-        }
         default:
             cout << "Shape type " << objectSt << " not recognized." << endl;
     }
@@ -231,6 +267,7 @@ Object* Raytracer::parseObject(const YAML::Node& node)
     if (returnObject) {
         // read the material and attach to object
         returnObject->material = parseMaterial(node["material"]);
+        returnObject->material->object = returnObject;
     }
 
     return returnObject;

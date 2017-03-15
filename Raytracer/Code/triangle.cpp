@@ -39,3 +39,7 @@ bool Triangle::isInside(Point v1, Point v2, Point intersect, Vector N) {
     
     return (N.dot(C) >= 0);
 }
+
+Point Triangle::textureCoordinates(Point p) {
+    return p;
+}

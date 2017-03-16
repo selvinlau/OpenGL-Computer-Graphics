@@ -24,6 +24,7 @@
 #include "object.h"
 #include "image.h"
 #include "camera.h"
+#include "gooch.h"
 
 class Scene
 {
@@ -34,7 +35,8 @@ public:
     enum RenderModes {
         PHONG,
         ZBUFFER,
-        NORMAL
+        NORMAL,
+        GOOCH
     };
     
     typedef map<string, RenderModes> RenderMap;
@@ -80,6 +82,7 @@ public:
     void setNumSamples(int s);
     void setCameraModel(CameraModels m);
     void setCamera(Camera *c);
+    void setGooch(Gooch *g);
     
     unsigned int getNumObjects() { return objects.size(); }
     unsigned int getNumLights() { return lights.size(); }
@@ -113,12 +116,23 @@ private:
     double maxDist;
     //Added a camera for the extended camera model
     Camera *camera;
+    //Added gooch model params
+    Gooch *gooch;
     
     //Methods
     Color tracePhong(Material *material, Point hit, Vector N, Vector V);
     Color traceNormalBuffer(Vector N);
     Color traceZBuffer(Hit N);
+    Color traceGooch(Material *material, Point hit, Vector N, Gooch *gooch);
     
+    Color traceColor(RenderModes rm, Material *material, Point hit, Vector N, Vector V);
+    Color phongDiffuseColor(double NdotL, Color lColor);
+    Color phongTotalColor(Color diff, Color matColor, double ka, double kd);
+    Color goochColor(Gooch *gooch, double NdotL, Color lColor, Color matColor, double matkd );
+
+
+
+
     //Check if there is a shadow at the point hit
     bool isShadow(const Point hit, Vector L);
     //Returns the reflection color

@@ -65,6 +65,19 @@ Camera* Raytracer::parseCamera(const YAML::Node& node)
     return c;
 }
 
+Gooch* Raytracer::parseGooch(const YAML::Node& node)
+{
+    Gooch *g = new Gooch();
+    
+    const YAML :: Node * params = node.FindValue("GoochParameters");
+    (*params)["b"] >> g->b;
+    (*params)["y"] >> g->y;
+    (*params)["alpha"] >> g->alpha;
+    (*params)["beta"] >> g->beta;
+    
+    return g;
+}
+
 Scene::CameraModels Raytracer::parseCameraModel(const YAML::Node& node) {
     Scene::CameraModels mode;
     
@@ -149,8 +162,6 @@ Material* Raytracer::parseMaterial(const YAML::Node& node)
         *texture >> text;
         const char * c = text.c_str();
         m->texture = new Image(c);
-        cout << c << endl;
-        cout << "TEXT" << m->texture->colorAt(0.1, 0.1) << endl;
     } else {
         node["color"] >> m->color;
         m->texture = NULL;
@@ -342,7 +353,9 @@ bool Raytracer::readScene(const std::string& inputFilename)
             }
             
             // Read scene configuration options
-            scene->setRenderMode(parseRenderMode(doc));
+            Scene::RenderModes rm = parseRenderMode(doc);
+            scene->setRenderMode(rm);
+            
             scene->setShadows(parseShadows(doc));
             scene->setReflectionDepth(parseReflectionDepth(doc));
             scene->setRefract(parseRefract(doc));
@@ -356,6 +369,10 @@ bool Raytracer::readScene(const std::string& inputFilename)
             } else {
                 scene->setCameraModel(Scene::EXTENDED);
                 scene->setCamera(parseCamera(doc["Camera"]));
+            }
+            
+            if (rm == Scene::GOOCH) {
+                scene->setGooch(parseGooch(doc));
             }
         }
         if (parser) {

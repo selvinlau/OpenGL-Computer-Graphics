@@ -17,15 +17,35 @@
 #include "sphere.h"
 #include <iostream>
 #include <math.h>
+#include "matrix3.h"
 
 /************************** Sphere **********************************/
 
-Point Sphere::textureCoordinates(Point p) {
+Matrix3 * Sphere::computeRotationMatrix3(double r, Vector axis, double angle) {
+    
+    angle *= M_PI / 180.0;
+    axis.normalized();
+    
+    double c = cos(angle);
+    double s = sin(angle);
+    double t = 1 - c;
+    
+    Triple r1(t * pow(axis.x, 2) + c, t * axis.x * axis.y - axis.z * s, t * axis.x * axis.z + axis.y * s);
+    Triple r2(t * axis.x * axis.y + axis.z * s, t * pow(axis.y, 2) + c, t * axis.y * axis.z - axis.x * s);
+    Triple r3(t * axis.x * axis.z - axis.y * s, t * axis.y * axis.z + axis.x * s, t * pow(axis.z, 2) + c);
+    
+    return new Matrix3(r1, r2, r3);
+}
+
+Point Sphere::textureCoordinates(Point point) {
     double u;
     double v;
     double theta;
     double phi;
     
+    
+    Point p = rotate(point);
+    //Point p = point;
     theta = acos((p.z - this->position.z) / this->r);
     phi = atan2(p.y - this->position.y, p.x - this->position.x);
     
@@ -36,6 +56,15 @@ Point Sphere::textureCoordinates(Point p) {
     u = phi / (2 * M_PI);
     v = (M_PI - theta) / M_PI;
     return Point(u, v, 0);
+}
+
+Point Sphere::rotate(Point point) {
+    if (rotation == NULL) {
+        return point;
+    }
+    
+    Point rotated = (*rotation) * point;
+    return rotated;
 }
 
 Hit Sphere::intersect(const Ray &ray)

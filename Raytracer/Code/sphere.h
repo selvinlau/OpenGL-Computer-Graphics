@@ -18,21 +18,25 @@
 #define SPHERE_H_115209AE
 
 #include "object.h"
+#include <math.h>
+#include "matrix3.h"
 
 class Sphere : public Object
 {
 public:
     Sphere(Point position, double r) : position(position), r(r) { }
-    Sphere(Point position, double r, Vector axis, double angle) : position(position), r(r), axis(axis), angle(angle) { }
+    Sphere(Point position, double r, Vector axis, double angle) : position(position), r(r), rotation(computeRotationMatrix3(r, axis, angle)) {}
     
     virtual Hit intersect(const Ray &ray);
     virtual Point textureCoordinates(Point p);
 
     const Point position;
     const double r;
-    
-    Vector axis;
-    double angle;
+    const Matrix3 *rotation;
+
+private:
+    Matrix3 * computeRotationMatrix3(double r, Vector axis, double angle);
+    Point rotate(Point point);
 };
 
 #endif /* end of include guard: SPHERE_H_115209AE */

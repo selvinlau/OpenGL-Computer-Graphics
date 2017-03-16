@@ -25,6 +25,8 @@
 #include "plane.h"
 #include "triangle.h"
 #include "cylinder.h"
+#include "camera.h"
+#include "gooch.h"
 
 class Raytracer {
 public:
@@ -62,6 +64,7 @@ private:
     int parseNumSamples(const YAML::Node& node);
     Camera* parseCamera(const YAML::Node& node);
     Scene::CameraModels parseCameraModel(const YAML::Node& node);
+    Gooch* parseGooch(const YAML::Node& node);
     
     //Parse objects
     Sphere* parseSphere(const YAML::Node& node);

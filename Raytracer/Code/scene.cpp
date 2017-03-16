@@ -18,6 +18,7 @@
 #include "material.h"
 #include "camera.h"
 #include "math.h"
+#include "gooch.h"
 
 //Map initialization
 Scene::RenderMap Scene::mapStringToRender = Scene::initRenderMap();
@@ -51,7 +52,8 @@ Color Scene::trace(const Ray &ray)
     Color resultColor;
     switch (renderMode) {
         case PHONG:
-            resultColor = tracePhong(material, hit, N, V);
+        case GOOCH:
+            resultColor = traceColor(renderMode, material, hit, N, V);
             break;
         case ZBUFFER:
             resultColor = traceZBuffer(min_hit);
@@ -62,6 +64,96 @@ Color Scene::trace(const Ray &ray)
         default:
             break;
     }
+    
+    return resultColor;
+}
+
+Color Scene::goochColor(Gooch *gooch, double NdotL, Color lColor, Color matColor, double matkd ) {
+    Color goochColor(0.0, 0.0, 0.0);
+    
+    Color kBlue(0, 0, gooch->b);
+    Color kYellow(gooch->y, gooch->y, 0);
+    
+    Color kd;
+    Color kWarm;
+    Color kCool;
+    
+    for (unsigned int i = 0; i < lights.size(); i++) {
+        
+        kd = lColor * matColor * matkd;
+        kCool = kBlue + gooch->alpha * kd;
+        kWarm = kYellow + gooch->beta * kd;
+        
+        goochColor += kCool * (1 - NdotL) / 2 + kWarm * (1 + NdotL) / 2;
+        
+    }
+    
+    return goochColor;
+}
+
+Color Scene::phongDiffuseColor(double NdotL, Color lColor) {
+    return max(0.0, NdotL) * lColor;
+}
+
+Color Scene::phongTotalColor(Color diff, Color matColor, double ka, double kd) {
+    Color ambient = matColor * ka;
+    Color diffuse = diff * matColor * kd;
+    return ambient + diffuse;
+}
+
+Color Scene::traceColor(RenderModes rm, Material *material, Point hit, Vector N, Vector V) {
+    Color resultColor; // place holder
+    Color color(0.0, 0.0, 0.0);
+    Color specular(0.0, 0.0, 0.0);
+    
+    double NdotL;
+    double RdotV;
+    
+    Vector L;
+    Vector R;
+    
+    //Add each light effect in the diffuse and specular colors
+    for (unsigned int i = 0; i < lights.size(); i++) {
+        
+        L = (lights[i]->position - hit).normalized();
+        
+        if (isShadow(hit, L)) {
+            continue;
+        }
+        
+        NdotL = N.dot(L);
+        
+        R = (2 * NdotL * N - L).normalized();
+        RdotV = R.dot(V);
+        
+        switch (rm) {
+            case PHONG:
+                color += phongDiffuseColor(NdotL, lights[i]->color);
+                break;
+            case GOOCH:
+                color += goochColor(gooch, NdotL, lights[i]->color, material->getColor(hit), material->kd);
+                break;
+        }
+        
+        specular += pow(max(0.0, RdotV), material->n) * lights[i]->color;
+    }
+    
+    //Compute the reflection and set the counter to 0 after
+    Color reflection = reflect(N, V, hit, material->ks);
+    reflectionDepth = 0;
+    
+    //Compute the refraction and set the counter to 0 after
+    Color refraction = refract(N, V, hit, material->eta);
+    refractionDepth = 0;
+    
+    
+    if (rm == PHONG) {
+        color = phongTotalColor(color, material->getColor(hit), material->ka, material->kd);
+    }
+    
+    specular = specular * material->ks;
+    
+    resultColor = color + specular + reflection + refraction;
     
     return resultColor;
 }
@@ -348,6 +440,10 @@ void Scene::setCameraModel(Scene::CameraModels m) {
     cameraModel = m;
 }
 
+void Scene::setGooch(Gooch *g) {
+    gooch = g;
+}
+
 //Map initializations
 Scene::RenderMap Scene::initRenderMap() {
     Scene::RenderMap map;
@@ -355,6 +451,7 @@ Scene::RenderMap Scene::initRenderMap() {
     map["phong"] = PHONG;
     map["z-buffer"] = ZBUFFER;
     map["normal"] = NORMAL;
+    map["gooch"] = GOOCH;
     return map;
 }
 

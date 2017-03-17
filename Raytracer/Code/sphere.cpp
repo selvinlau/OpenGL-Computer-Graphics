@@ -44,8 +44,8 @@ Point Sphere::textureCoordinates(Point point) {
     double phi;
     
     
-    Point p = rotate(point);
-    //Point p = point;
+    //Point p = rotate(point);
+    Point p = point;
     theta = acos((p.z - this->position.z) / this->r);
     phi = atan2(p.y - this->position.y, p.x - this->position.x);
     

@@ -29,6 +29,8 @@
 #include "sierpinski.h"
 #include "camera.h"
 #include "gooch.h"
+#include "glm.h"
+#include "model.h"
 
 class Raytracer {
 public:
@@ -39,7 +41,8 @@ public:
         TRIANGLE,
         CYLINDER,
         TETRAHEDRON,
-        SIERPINSKI
+        SIERPINSKI,
+        MODEL
     };
     typedef map<string, Objects> ObjectMap;
     static ObjectMap mapStringToObject;
@@ -77,6 +80,7 @@ private:
     Cylinder* parseCylinder(const YAML::Node& node);
     Tetrahedron* parseTetrahedron(const YAML::Node& node);
     Sierpinski* parseSierpinski(const YAML::Node& node);
+    Model* parseModel(const YAML::Node& node);
 };
 
 #endif /* end of include guard: RAYTRACER_H_6GQO67WK */

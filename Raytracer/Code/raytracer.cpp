@@ -29,6 +29,8 @@
 #include <string.h>
 #include "tetrahedron.h"
 #include "sierpinski.h"
+#include "glm.h"
+#include "model.h"
 
 // Functions to ease reading from YAML input
 void operator >> (const YAML::Node& node, Triple& t);
@@ -273,6 +275,20 @@ Sierpinski* Raytracer::parseSierpinski(const YAML::Node& node) {
     return new Sierpinski(center, side, recursions);
 }
 
+Model* Raytracer::parseModel(const YAML::Node& node) {
+    
+    std::string text;
+    node["file"] >> text;
+    const char* c = text.c_str();
+    GLMmodel *model = glmReadOBJ(c);
+    
+    float* vertices = model->vertices;
+    GLMtriangle* triangles = model->triangles;
+    unsigned int numTriangles = model->numtriangles;
+    
+    return new Model(numTriangles, triangles, vertices);
+}
+
 Object* Raytracer::parseObject(const YAML::Node& node)
 {
     Object *returnObject = NULL;
@@ -297,6 +313,9 @@ Object* Raytracer::parseObject(const YAML::Node& node)
             break;
         case SIERPINSKI:
             returnObject = parseSierpinski(node);
+            break;
+        case MODEL:
+            returnObject = parseModel(node);
             break;
         default:
             cout << "Shape type " << objectSt << " not recognized." << endl;
@@ -435,5 +454,6 @@ Raytracer::ObjectMap Raytracer::initObjectMap() {
     map["cylinder"] = CYLINDER;
     map["tetrahedron"] = TETRAHEDRON;
     map["sierpinski"] = SIERPINSKI;
+    map["model"] = MODEL;
     return map;
 }

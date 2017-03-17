@@ -23,12 +23,11 @@ Hit Triangle::intersect(const Ray &ray)
     }
     
     Point intersect = ray.at(t);
-    
     //Check if the intersection point is inside the 3 edges of the triangle
     if (! (isInside(v1, v2, intersect, N) && (isInside(v2, v3, intersect, N)) && (isInside(v3, v1, intersect, N)))) {
         return Hit::NO_HIT();
     }
-    return Hit(t,N);
+    return Hit(t, N);
 }
 
 //Compute the edge that joints the vertices v1 and v2 of the triangle of normal N and check if the itersect point is "inside" it.

@@ -27,6 +27,7 @@
 #include <fstream>
 #include <assert.h>
 #include <string.h>
+#include "tetrahedron.h"
 
 // Functions to ease reading from YAML input
 void operator >> (const YAML::Node& node, Triple& t);
@@ -252,6 +253,14 @@ Cylinder* Raytracer::parseCylinder(const YAML::Node& node) {
     return new Cylinder(p1,p2,r);
 }
 
+Tetrahedron* Raytracer::parseTetrahedron(const YAML::Node& node) {
+    Point center;
+    double side;
+    node["center"] >> center;
+    node["side"] >> side;
+    return new Tetrahedron(center, side);
+}
+
 Object* Raytracer::parseObject(const YAML::Node& node)
 {
     Object *returnObject = NULL;
@@ -270,6 +279,9 @@ Object* Raytracer::parseObject(const YAML::Node& node)
             break;
         case CYLINDER:
             returnObject = parseCylinder(node);
+            break;
+        case TETRAHEDRON:
+            returnObject = parseTetrahedron(node);
             break;
         default:
             cout << "Shape type " << objectSt << " not recognized." << endl;
@@ -406,5 +418,6 @@ Raytracer::ObjectMap Raytracer::initObjectMap() {
     map["plane"] = PLANE;
     map["triangle"] = TRIANGLE;
     map["cylinder"] = CYLINDER;
+    map["tetrahedron"] = TETRAHEDRON;
     return map;
 }

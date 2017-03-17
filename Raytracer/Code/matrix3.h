@@ -25,6 +25,7 @@ using namespace std;
 class Matrix3
 {
 public:
+    static const size_t ROWS = 3;
     Matrix3() {}
     Matrix3(Triple r1, Triple r2, Triple r3);
     Triple operator*(Triple vector) const;
@@ -33,7 +34,7 @@ private:
     std::vector<Triple> mData;
 };
 
-inline Matrix3::Matrix3(Triple r1, Triple r2, Triple r3) : mData(3){
+inline Matrix3::Matrix3(Triple r1, Triple r2, Triple r3) : mData(ROWS) {
     mData[0] = r1;
     mData[1] = r2;
     mData[2] = r3;

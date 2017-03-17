@@ -27,6 +27,7 @@ public:
     double t;
     Vector N;
 
+    Hit() {}
     Hit(const double t, const Vector &normal)
         : t(t), N(normal)
     { }

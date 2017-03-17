@@ -26,6 +26,7 @@
 #include "triangle.h"
 #include "cylinder.h"
 #include "tetrahedron.h"
+#include "sierpinski.h"
 #include "camera.h"
 #include "gooch.h"
 
@@ -37,7 +38,8 @@ public:
         PLANE,
         TRIANGLE,
         CYLINDER,
-        TETRAHEDRON
+        TETRAHEDRON,
+        SIERPINSKI
     };
     typedef map<string, Objects> ObjectMap;
     static ObjectMap mapStringToObject;
@@ -74,6 +76,7 @@ private:
     Triangle* parseTriangle(const YAML::Node& node);
     Cylinder* parseCylinder(const YAML::Node& node);
     Tetrahedron* parseTetrahedron(const YAML::Node& node);
+    Sierpinski* parseSierpinski(const YAML::Node& node);
 };
 
 #endif /* end of include guard: RAYTRACER_H_6GQO67WK */

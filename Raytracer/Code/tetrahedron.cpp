@@ -6,7 +6,7 @@
 #include "hit.h"
 #include "triangle.h"
 
-Tetrahedron::Tetrahedron(Point center, double side) : faces(FACES) {
+Tetrahedron::Tetrahedron(Point center, double side) : center(center), side(side), vertices(FACES), faces(FACES) {
     genTriangles(center, side);
 }
 
@@ -35,12 +35,16 @@ Hit Tetrahedron::minHit(vector<Hit> hits) {
 
 void Tetrahedron::genTriangles(Point center, double side) {
     
+    Point top = Point(0, 1, 1 / sqrt(2)) * side / 2 + center;
     Point b1 = Point(1, 0, -1 / sqrt(2)) * side / 2 + center;
     Point b2 = Point(-1, 0, -1 / sqrt(2)) * side / 2 + center;
     Point b3 = Point(0, -1, 1 / sqrt(2)) * side / 2 + center;
-    Point top = Point(0, 1, 1 / sqrt(2)) * side / 2 + center;
     
-    cout << top << " " << b1 << " " << b2 << " " << b3 << endl;
+    vertices[0] = top;
+    vertices[1] = b1;
+    vertices[2] = b2;
+    vertices[3] = b3;
+    
     faces[0] = new Triangle(top, b1, b2);
     faces[1] = new Triangle(top, b2, b3);
     faces[2] = new Triangle(top, b3, b1);

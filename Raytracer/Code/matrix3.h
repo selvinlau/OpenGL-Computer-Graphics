@@ -28,27 +28,17 @@ public:
     static const size_t ROWS = 3;
     Matrix3() {}
     Matrix3(Triple r1, Triple r2, Triple r3);
-    Triple operator*(Triple vector) const;
+    Matrix3(const Matrix3 &m);
+    
+    Triple operator*(const Triple &vector) const;
+    Matrix3 operator*(double k) const;
+    Matrix3 operator+(const Matrix3 &mat) const;
+    Triple operator()(int row) const;
+    
+    friend ostream& operator<<(ostream &s, const Matrix3 &mat);
     
 private:
     std::vector<Triple> mData;
 };
-
-inline Matrix3::Matrix3(Triple r1, Triple r2, Triple r3) : mData(ROWS) {
-    mData[0] = r1;
-    mData[1] = r2;
-    mData[2] = r3;
-}
-
-inline Triple Matrix3::operator*(Triple vector) const
-{
-    Triple result;
-    result.x = mData[0].dot(vector);
-    result.y = mData[1].dot(vector);
-    result.z = mData[2].dot(vector);
-    
-    return result;
-}
-
 
 #endif /* end of include guard: Matrix3_H_INCLUDED */

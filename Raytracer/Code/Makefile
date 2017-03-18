@@ -18,7 +18,8 @@ EXECUTABLE = ray
 
 OBJS = main.o raytracer.o sphere.o light.o material.o \
 	image.o triple.o lodepng.o scene.o plane.o cylinder.o \
-	triangle.o tetrahedron.o sierpinski.o glm.o model.o
+	triangle.o tetrahedron.o sierpinski.o glm.o model.o \
+	matrix3.o
 
 YAMLOBJS = $(subst .cpp,.o,$(wildcard yaml/*.cpp))
 

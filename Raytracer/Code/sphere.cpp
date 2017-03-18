@@ -24,17 +24,32 @@
 Matrix3 * Sphere::computeRotationMatrix3(double r, Vector axis, double angle) {
     
     angle *= M_PI / 180.0;
-    axis.normalized();
+    axis = axis.normalized();
     
-    double c = cos(angle);
-    double s = sin(angle);
-    double t = 1 - c;
+//    Matrix3 identity(Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1));
+//    Matrix3 last(Vector(0, -axis.z, axis.y), Vector(axis.z, 0, -axis.x), Vector(-axis.y, axis.x, 0));
+//    
+//    Vector mr1(pow(axis.x, 2), axis.x * axis.y, axis.x * axis.z);
+//    Vector mr2(axis.y * axis.x, pow(axis.y, 2), axis.y * axis.z);
+//    Vector mr3(axis.z * axis.x, axis.z * axis.y, pow(axis.z, 2));
+//    Matrix3 middle(mr1, mr2, mr3);
+//    
+//    Matrix3 aux(identity * cos(angle));
+//    Matrix3 aux2(middle * (1 - cos(angle)));
+//    Matrix3 aux3(last * sin(angle));
+//    
+//    return new Matrix3(aux + aux2 + aux3);
     
-    Triple r1(t * pow(axis.x, 2) + c, t * axis.x * axis.y - axis.z * s, t * axis.x * axis.z + axis.y * s);
-    Triple r2(t * axis.x * axis.y + axis.z * s, t * pow(axis.y, 2) + c, t * axis.y * axis.z - axis.x * s);
-    Triple r3(t * axis.x * axis.z - axis.y * s, t * axis.y * axis.z + axis.x * s, t * pow(axis.z, 2) + c);
+    double k = axis.x * sin(angle / 2);
+    double m = axis.y * sin(angle / 2);
+    double n = axis.z * sin(angle / 2);
+    double p = cos(angle / 2);
     
-    return new Matrix3(r1, r2, r3);
+    Vector r1(pow(k, 2) - pow(m, 2) - pow(n, 2) + pow(p, 2), 2 * (k * m - n * p), 2 * (n * k + m * p));
+    Vector r2(2 * (k * m - n * p), -pow(m, 2) + pow(p, 2), 2 * (m * n - k * p));
+    Vector r3(2 * (n * k - m * p), 2 * (m * n + k * p),  -pow(m, 2) + pow(p, 2));
+    
+    return new Matrix3(r1 * r, r2 * r, r3 * r);
 }
 
 Point Sphere::textureCoordinates(Point point) {
@@ -43,9 +58,7 @@ Point Sphere::textureCoordinates(Point point) {
     double theta;
     double phi;
     
-    
-    //Point p = rotate(point);
-    Point p = point;
+    Point p = rotate(point);
     theta = acos((p.z - this->position.z) / this->r);
     phi = atan2(p.y - this->position.y, p.x - this->position.x);
     

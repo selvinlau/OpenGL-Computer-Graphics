@@ -6,47 +6,22 @@
 #include "hit.h"
 #include "triangle.h"
 #include "glm.h"
+#include "composite.h"
 
-Model::Model(unsigned int numTriangles, GLMtriangle *tris, float *vertices) {
-    genTriangles(numTriangles, tris, vertices);
+Model::Model(unsigned int numTriangles, GLMtriangle *tris, float *vertices, Point position, double scale) : Composite(numTriangles) {
+    genTriangles(numTriangles, tris, vertices, position, scale);
 }
 
-Hit Model::intersect(const Ray &ray) {
-    std::vector<Hit> hits(triangles.size());
+void Model::genTriangles(unsigned int numTriangles, GLMtriangle *tris, float *vertices, Point position, double scale) {
     
-    for (unsigned int i = 0; i < triangles.size(); i++) {
-        hits[i] = triangles[i]->intersect(ray);
-    }
-    return minHit(hits);
-}
-
-Hit Model::minHit(vector<Hit> hits) {
-    int indx = 0;
-    double mint = hits[indx].t;
-    
-    for (unsigned int i = 1; i < triangles.size(); i++) {
-        if (!isnan(hits[i].t) && (hits[i].t < mint || isnan(mint))) {
-            mint = hits[i].t;
-            indx = i;
-        }
-    }
-    
-    return hits[indx];
-}
-
-void Model::genTriangles(unsigned int numTriangles, GLMtriangle *tris, float *vertices) {
     unsigned int *vindices;
     std::vector<Point> triPoints(3);
     
     for (unsigned int i = 0; i < numTriangles; i++) {
         vindices = tris[i].vindices;
         for (unsigned int j = 0; j < 3; j++) {
-            triPoints[j] = Point(vertices[3 * vindices[j]], vertices[3 * vindices[j] + 1], vertices[3 * vindices[j] + 2]) + Point(140,300,400);
+            triPoints[j] = Point(vertices[3 * vindices[j]], vertices[3 * vindices[j] + 1], vertices[3 * vindices[j] + 2]) * scale + position;
         }
-        triangles.push_back(new Triangle(triPoints[0], triPoints[1], triPoints[2]));
+        figures.push_back(new Triangle(triPoints[0], triPoints[1], triPoints[2]));
     }
-}
-
-Point Model::textureCoordinates(Point p) {
-    return p;
 }

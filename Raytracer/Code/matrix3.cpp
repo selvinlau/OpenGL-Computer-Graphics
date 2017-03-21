@@ -37,6 +37,33 @@ Matrix3 Matrix3::operator*(double k) const
     return Matrix3(r1, r2, r3);
 }
 
+Matrix3 Matrix3::operator*(const Matrix3 &mat) const
+{
+    std::vector<Triple> rows(3);
+    
+    Triple row;
+    Triple nrow;
+    for(unsigned int i = 0; i < ROWS; i++) {
+        row = mData[i];
+        Triple nrow(row.dot(mat.getCol(0)), row.dot(mat.getCol(1)), row.dot(mat.getCol(2)));
+        rows[i] = nrow;
+    }
+    
+    return Matrix3(rows[0], rows[1], rows[2]);
+}
+
+Triple Matrix3::getCol(int col) const {
+    switch (col) {
+        case 0:
+            return Triple(mData[0].x, mData[1].x, mData[2].x);
+        case 1:
+            return Triple(mData[0].y, mData[1].y, mData[2].y);
+        case 2:
+            return Triple(mData[0].z, mData[1].z, mData[2].z);
+    }
+    return Triple();
+}
+
 Matrix3 Matrix3::operator+(const Matrix3 &mat) const
 {
     Triple r1 = mData[0] + mat(0);

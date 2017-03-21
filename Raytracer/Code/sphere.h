@@ -24,7 +24,7 @@
 class Sphere : public Object
 {
 public:
-    Sphere(Point position, double r) : position(position), r(r) { }
+    Sphere(Point position, double r) : position(position), r(r), rotation(NULL) { }
     Sphere(Point position, double r, Vector axis, double angle) : position(position), r(r), rotation(computeRotationMatrix3(r, axis, angle)) {}
     
     virtual Hit intersect(const Ray &ray);
@@ -35,6 +35,7 @@ public:
     const Matrix3 *rotation;
 
 private:
+    Matrix3 genRotationMatrix(Vector axis, double angle);
     Matrix3 * computeRotationMatrix3(double r, Vector axis, double angle);
     Point rotate(Point point);
 };

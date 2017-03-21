@@ -68,25 +68,22 @@ Color Scene::trace(const Ray &ray)
     return resultColor;
 }
 
-Color Scene::goochColor(Gooch *gooch, double NdotL, Color lColor, Color matColor, double matkd ) {
+Color Scene::goochColor(Gooch *gooch, double NdotL, double VdotN, Color lColor, Color matColor, double matkd ) {
     Color goochColor(0.0, 0.0, 0.0);
     
-    Color kBlue(0, 0, gooch->b);
-    Color kYellow(gooch->y, gooch->y, 0);
+    if (VdotN < gooch->edge) {
+        return Color(0.0, 0.0, 0.0);
+    }
     
     Color kd;
     Color kWarm;
     Color kCool;
-    
-    for (unsigned int i = 0; i < lights.size(); i++) {
         
-        kd = lColor * matColor * matkd;
-        kCool = kBlue + gooch->alpha * kd;
-        kWarm = kYellow + gooch->beta * kd;
+    kd = lColor * matColor * matkd;
+    kCool = gooch->kBlue + gooch->alpha * kd;
+    kWarm = gooch->kYellow + gooch->beta * kd;
         
-        goochColor += kCool * (1 - NdotL) / 2 + kWarm * (1 + NdotL) / 2;
-        
-    }
+    goochColor += kCool * (1 - NdotL) / 2 + kWarm * (1 + NdotL) / 2;
     
     return goochColor;
 }
@@ -131,7 +128,9 @@ Color Scene::traceColor(RenderModes rm, Material *material, Point hit, Vector N,
                 color += phongDiffuseColor(NdotL, lights[i]->color);
                 break;
             case GOOCH:
-                color += goochColor(gooch, NdotL, lights[i]->color, material->getColor(hit), material->kd);
+                color += goochColor(gooch, NdotL, V.dot(N), lights[i]->color, material->getColor(hit), material->kd);
+                break;
+            default:
                 break;
         }
         
@@ -156,56 +155,6 @@ Color Scene::traceColor(RenderModes rm, Material *material, Point hit, Vector N,
     resultColor = color + specular + reflection + refraction;
     
     return resultColor;
-}
-
-Color Scene::tracePhong(Material *material, Point hit, Vector N, Vector V) {
-    
-    Color resultColor; // place holder
-    Color ambient;
-    Color diffuse(0.0, 0.0, 0.0);
-    Color specular(0.0, 0.0, 0.0);
-    
-    double NdotL;
-    double RdotV;
-    
-    Vector L;
-    Vector R;
-    
-    //Add each light effect in the diffuse and specular colors
-    for (unsigned int i = 0; i < lights.size(); i++) {
-    
-        L = (lights[i]->position - hit).normalized();
-        
-        if (isShadow(hit, L)) {
-            continue;
-        }
-
-        NdotL = N.dot(L);
-        
-        R = (2 * NdotL * N - L).normalized();
-        RdotV = R.dot(V);
-    
-        diffuse += max(0.0, NdotL) * lights[i]->color;
-        specular += pow(max(0.0, RdotV), material->n) * lights[i]->color;
-    }
-    
-    //Compute the reflection and set the counter to 0 after
-    Color reflection = reflect(N, V, hit, material->ks);
-    reflectionDepth = 0;
-    
-    //Compute the refraction and set the counter to 0 after
-    Color refraction = refract(N, V, hit, material->eta);
-    refractionDepth = 0;
-    
-    //Compute the total color
-    ambient = material->getColor(hit) * material->ka;
-    diffuse = diffuse * material->kd * material->getColor(hit);
-    specular = specular * material->ks;
-    
-    resultColor = ambient + diffuse + specular + reflection + refraction;
-  
-    return resultColor;
-   
 }
 
 Color Scene::traceNormalBuffer(Vector N)

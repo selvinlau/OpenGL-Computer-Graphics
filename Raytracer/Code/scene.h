@@ -120,15 +120,13 @@ private:
     Gooch *gooch;
     
     //Methods
-    Color tracePhong(Material *material, Point hit, Vector N, Vector V);
+    Color traceColor(RenderModes rm, Material *material, Point hit, Vector N, Vector V);
     Color traceNormalBuffer(Vector N);
     Color traceZBuffer(Hit N);
-    Color traceGooch(Material *material, Point hit, Vector N, Gooch *gooch);
     
-    Color traceColor(RenderModes rm, Material *material, Point hit, Vector N, Vector V);
     Color phongDiffuseColor(double NdotL, Color lColor);
     Color phongTotalColor(Color diff, Color matColor, double ka, double kd);
-    Color goochColor(Gooch *gooch, double NdotL, Color lColor, Color matColor, double matkd );
+    Color goochColor(Gooch *gooch, double NdotL, double VdotN, Color lColor, Color matColor, double matkd );
 
 
 

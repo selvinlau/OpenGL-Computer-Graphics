@@ -1,29 +1,25 @@
-//Class that models a cylinder (centered in any axis) from the center of the bottom cap p1, the center of the top cap p2 and its radius r.
-#ifndef Tetrahedron_H_INCLUDE
-#define Tetrahedron_H_INCLUDE
+//Class that models a regular tetrahedron.
 
-#include "object.h"
+#ifndef TETRAHEDRON_H_INCLUDE
+#define TETRAHEDRON_H_INCLUDE
+
+#include "composite.h"
 #include <vector>
 #include "triangle.h"
 
-class Tetrahedron : public Object
+class Tetrahedron : public Composite
 {
 public:
-    static const size_t FACES = 4;
+    static const int FACES = 4;
     
     Tetrahedron(Point center, double side);
-
-    virtual Hit intersect(const Ray &ray);
-    virtual Point textureCoordinates(Point p);
     
-    Point center;
-    double side;
+    Point center;   //Center of the tetrahedron
+    double side;    //Side length of the tetrahedron
     std::vector<Point> vertices;
     
 private:
-    std::vector<Triangle *> faces;
     void genTriangles(Point center, double side);
-    Hit minHit(vector<Hit> hits);
 };
 
-#endif /* end of include guard: Tetrahedron_H_INCLUDE */
+#endif /* end of include guard: TETRAHEDRON_H_INCLUDE */

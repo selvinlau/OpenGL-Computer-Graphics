@@ -23,12 +23,29 @@
 
 Matrix3 * Sphere::computeRotationMatrix3(double r, Vector axis, double angle) {
     
-    angle *= M_PI / 180.0;
+    if (angle == 0) {
+        return NULL;
+    }
     
     if (axis.length() != 0) {
         axis = axis.normalized();
     }
     
+    //Rotation to map the arbitrary axis to the z-axis
+    double zangle;
+    Vector zaxis(0.0, 0.0, -1.0);
+    zangle = acos(-r * axis.dot(zaxis) * M_PI / 180.0);
+    axis = zaxis.cross(axis).normalized();
+    
+    Matrix3 mapZaxis = genRotationMatrix(axis, zangle);
+    
+    //Rotation around the z-axis
+    Matrix3 rotation = genRotationMatrix(zaxis, angle * M_PI / 180.0);
+    
+    return new Matrix3(rotation * mapZaxis);
+}
+
+Matrix3 Sphere::genRotationMatrix(Vector axis, double angle) {
     Matrix3 identity(Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1));
     Matrix3 last(Vector(0, -axis.z, axis.y), Vector(axis.z, 0, -axis.x), Vector(-axis.y, axis.x, 0));
     
@@ -37,32 +54,7 @@ Matrix3 * Sphere::computeRotationMatrix3(double r, Vector axis, double angle) {
     Vector mr3(axis.z * axis.x, axis.z * axis.y, pow(axis.z, 2));
     Matrix3 middle(mr1, mr2, mr3);
     
-    Matrix3 aux(identity * cos(angle));
-    Matrix3 aux2(middle * (1 - cos(angle)));
-    Matrix3 aux3(last * sin(angle));
-    
-    return new Matrix3(aux + aux2 + aux3);
-    
-//    double k = axis.x * sin(angle / 2);
-//    double m = axis.y * sin(angle / 2);
-//    double n = axis.z * sin(angle / 2);
-//    double p = cos(angle / 2);
-//    
-//    Vector r1(pow(k, 2) - pow(m, 2) - pow(n, 2) + pow(p, 2), 2 * (k * m - n * p), 2 * (n * k + m * p));
-//    Vector r2(2 * (k * m - n * p), -pow(m, 2) + pow(p, 2), 2 * (m * n - k * p));
-//    Vector r3(2 * (n * k - m * p), 2 * (m * n + k * p),  -pow(m, 2) + pow(p, 2));
-//    
-//    return new Matrix3(r1, r2 , r3 );
-    
-//    double c = cos(angle);
-//    double s = sin(angle);
-//    double t = 1 - c;
-//    axis.z = - axis.z;
-//    Triple r1(t * pow(axis.x, 2) + c, t * axis.x * axis.y - axis.z * s, t * axis.x * axis.z + axis.y * s);
-//    Triple r2(t * axis.x * axis.y + axis.z * s, t * pow(axis.y, 2) + c, t * axis.y * axis.z - axis.x * s);
-//    Triple r3(t * axis.x * axis.z - axis.y * s, t * axis.y * axis.z + axis.x * s, t * pow(axis.z, 2) + c);
-//    
-//    return new Matrix3(r1, r2, r3);
+    return Matrix3(identity * cos(angle) + middle * (1 - cos(angle)) + last * sin(angle));
 }
 
 Point Sphere::textureCoordinates(Point point) {
@@ -81,6 +73,7 @@ Point Sphere::textureCoordinates(Point point) {
     
     u = phi / (2 * M_PI);
     v = (M_PI - theta) / M_PI;
+    
     return Point(u, v, 0);
 }
 
@@ -88,8 +81,9 @@ Point Sphere::rotate(Point point) {
     if (rotation == NULL) {
         return point;
     }
-   
-    Point rotated = (*rotation) * (point - position);
+    
+    point -= position;
+    Point rotated = (*rotation) * point;
     return rotated + position;
 }
 
@@ -146,4 +140,5 @@ Hit Sphere::intersect(const Ray &ray)
     Vector N = (intersection - position).normalized();
     
     return Hit(t,N);
+
 }

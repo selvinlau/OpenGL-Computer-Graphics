@@ -33,10 +33,12 @@ public:
     double eta;         // refraction coefficient
     Image *texture;     // image with the texture of the material
     
+    //Reference to the object that has this material
     Object *object;
     
     Material() { }
     
+    //Gets the color of the material at a point
     Color getColor(Point p);
 };
 

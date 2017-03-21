@@ -1,4 +1,5 @@
-//Class that models a cylinder (centered in any axis) from the center of the bottom cap p1, the center of the top cap p2 and its radius r.
+//Class that represents a figure comprised of an array of several triangles
+
 #ifndef MODEL_H_INCLUDE
 #define MODEL_H_INCLUDE
 
@@ -6,20 +7,15 @@
 #include <vector>
 #include "triangle.h"
 #include "glm.h"
+#include "composite.h"
 
-class Model : public Object
+class Model : public Composite
 {
 public:
-    Model(unsigned int numTriangles, GLMtriangle *tris, float *vertices);
-
-    virtual Hit intersect(const Ray &ray);
-    virtual Point textureCoordinates(Point p);
-    
-    std::vector<Triangle *> triangles;
+    Model(unsigned int numTriangles, GLMtriangle *tris, float *vertices, Point position, double scale);
     
 private:
-    void genTriangles(unsigned int numTriangles, GLMtriangle *tris, float *vertices);
-    Hit minHit(vector<Hit> hits);
+    void genTriangles(unsigned int numTriangles, GLMtriangle *tris, float *vertices, Point position, double scale);
 };
 
 #endif /* end of include guard: MODEL_H_INCLUDE */

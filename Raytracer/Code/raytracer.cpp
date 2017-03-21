@@ -71,15 +71,25 @@ Camera* Raytracer::parseCamera(const YAML::Node& node)
 
 Gooch* Raytracer::parseGooch(const YAML::Node& node)
 {
-    Gooch *g = new Gooch();
+    double b;
+    double y;
+    double alpha;
+    double beta;
+    double edge;
     
     const YAML :: Node * params = node.FindValue("GoochParameters");
-    (*params)["b"] >> g->b;
-    (*params)["y"] >> g->y;
-    (*params)["alpha"] >> g->alpha;
-    (*params)["beta"] >> g->beta;
+    (*params)["b"] >> b;
+    (*params)["y"] >> y;
+    (*params)["alpha"] >> alpha;
+    (*params)["beta"] >> beta;
     
-    return g;
+    if( const YAML :: Node * edges = (*params).FindValue("edge")) {
+        (*edges) >> edge;
+    } else {
+        edge = Gooch::DEFAULT_EDGE;
+    }
+    
+    return new Gooch(b, y, alpha, beta, edge);
 }
 
 Scene::CameraModels Raytracer::parseCameraModel(const YAML::Node& node) {
@@ -278,7 +288,13 @@ Sierpinski* Raytracer::parseSierpinski(const YAML::Node& node) {
 Model* Raytracer::parseModel(const YAML::Node& node) {
     
     std::string text;
+    Point pos;
+    double scale;
+    
     node["file"] >> text;
+    node["position"] >> pos;
+    node["scale"] >> scale;
+   
     const char* c = text.c_str();
     GLMmodel *model = glmReadOBJ(c);
     
@@ -286,7 +302,7 @@ Model* Raytracer::parseModel(const YAML::Node& node) {
     GLMtriangle* triangles = model->triangles;
     unsigned int numTriangles = model->numtriangles;
     
-    return new Model(numTriangles, triangles, vertices);
+    return new Model(numTriangles, triangles, vertices, pos, scale);
 }
 
 Object* Raytracer::parseObject(const YAML::Node& node)

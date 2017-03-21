@@ -1,19 +1,9 @@
 //
-//  Framework for a raytracer
-//  File: triple.h
-//
-//  Created for the Computer Science course "Introduction Computer Graphics"
-//  taught at the University of Groningen by Tobias Isenberg.
-//
-//  Author: Maarten Everts
-//
-//  This framework is inspired by and uses code of the raytracer framework of 
-//  Bert Freudenberg that can be found at
-//  http://isgwww.cs.uni-magdeburg.de/graphik/lehre/cg2/projekt/rtprojekt.html 
+// Class that models a 3x3 matrix
 //
 
-#ifndef Matrix3_H_INCLUDED
-#define Matrix3_H_INCLUDED
+#ifndef MATRIX3_H_INCLUDED
+#define MATRIX3_H_INCLUDED
 
 #include <math.h>
 #include <iostream>
@@ -32,6 +22,7 @@ public:
     
     Triple operator*(const Triple &vector) const;
     Matrix3 operator*(double k) const;
+    Matrix3 operator*(const Matrix3 &mat) const;
     Matrix3 operator+(const Matrix3 &mat) const;
     Triple operator()(int row) const;
     
@@ -39,6 +30,7 @@ public:
     
 private:
     std::vector<Triple> mData;
+    Triple getCol(int col) const;
 };
 
-#endif /* end of include guard: Matrix3_H_INCLUDED */
+#endif /* end of include guard: MATRIX_H_INCLUDED */
